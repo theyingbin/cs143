@@ -30,30 +30,34 @@ $equation = $_GET["expr"];
 $valid = preg_match("/\s*([-]?[0-9]+((\.)?[0-9]+)?)\s*(([+\-\/\*]\s*)[-]?[0-9]+((\.)?[0-9]+)?\s*)*/", $equation, $matches);
 $only_spaces = strlen(trim($equation)) == 0;
 $divide_by_zero = preg_match('/\/\s*[0]/', $equation);
+$preceding_zero = preg_match('/([^0-9][0][0-9]+|^([0][0-9]+))/', $equation);
 $multiple_matches = $equation !== $matches[0];
 
 if ($only_spaces) {
     // Do Nothing
 } elseif($multiple_matches){
-    echo "<h3>Result</h3>";
+    echo "<h2>Result</h2>";
+    echo "Invalid Expression!";
+} elseif($preceding_zero){
+    echo "<h2>Result</h2>";
     echo "Invalid Expression!";
 } elseif ($divide_by_zero) {
-    echo "<h3>Result</h3>";
+    echo "<h2>Result</h2>";
     echo "Division by zero error!";
 } elseif ($valid) {
     try{
         $tmp = str_replace('--', '- -', $equation);
         eval("\$result = $tmp;");
-        echo "<h3>Result</h3>";
+        echo "<h2>Result</h2>";
         echo $equation . " = " . $result;
     }
     catch(Exception $e){
-        echo "<h3>Result</h3>";
+        echo "<h2>Result</h2>";
         echo "Invalid Expression!";
     }
     
 } else {
-    echo "<h3>Result</h3>";
+    echo "<h2>Result</h2>";
     echo "Invalid Expression!";
 }
 ?>
