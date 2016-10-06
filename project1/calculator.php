@@ -29,18 +29,15 @@ Here are some(but not limit to) reasonable test cases:
 $equation = $_GET["expr"];
 $valid = preg_match("/\s*([-]?[0-9]+((\.)?[0-9]+)?)\s*(([+\-\/\*]\s*)[-]?[0-9]+((\.)?[0-9]+)?\s*)*/", $equation, $matches);
 $only_spaces = strlen(trim($equation)) == 0;
-$divide_by_zero = preg_match('/\/\s*[0]/', $equation);
-$preceding_zero = preg_match('/([^0-9][0][0-9]+|^([0][0-9]+))/', $equation);
+$divide_by_zero = preg_match('/((\/\s*[0][\s+\-\/\*])|(\/\s*[0]$)|(\/\s*[0][\.][0]+$)|(\/\s*[0][\.][0]+[^0-9]))/', $equation);
+$preceding_zero = preg_match('/([^0-9\.][0][0-9]+|^([0][0-9]+))/', $equation);
 $multiple_matches = $equation !== $matches[0];
 
 if ($only_spaces) {
     // Do Nothing
-} elseif($multiple_matches){
+} elseif($multiple_matches || $preceding_zero ){
     echo "<h2>Result</h2>";
-    echo "Invalid Expression!";
-} elseif($preceding_zero){
-    echo "<h2>Result</h2>";
-    echo "Invalid Expression!";
+    echo "Invalid Expression 1!";
 } elseif ($divide_by_zero) {
     echo "<h2>Result</h2>";
     echo "Division by zero error!";
@@ -53,12 +50,12 @@ if ($only_spaces) {
     }
     catch(Exception $e){
         echo "<h2>Result</h2>";
-        echo "Invalid Expression!";
+        echo "Invalid Expression 2!";
     }
     
 } else {
     echo "<h2>Result</h2>";
-    echo "Invalid Expression!";
+    echo "Invalid Expression 3!";
 }
 ?>
 
