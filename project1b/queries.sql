@@ -10,7 +10,8 @@ FROM(
     FROM MovieActor
     GROUP BY aid
     HAVING COUNT(mid) > 1
-) AS G;
+) AS Subquery;
+
 
 -- Return firstname lastname for all people who are both directors and actors and no longer alive --
 SELECT CONCAT(a.first, ' ', a.last) Name
