@@ -25,15 +25,20 @@ if(strlen($user_query) !== 0){
     }
     $fields = $result->fetch_fields();
     
-    echo '<table border="1" cellspacing="1" cellpadding="2"><tbody><tr align="center">';
-
-    for($i = 0; $i < count($fields); $i++){
-        echo '<td><b>'.$fields[$i]->name.'</b></td>';
-    }
-    echo '</tr>';
+    echo '<table border="1" cellspacing="1" cellpadding="2"><tbody>';
     
+    $titles = 0;
+
     while($row = $result->fetch_assoc()) {
         $attr = array_keys($row);
+        if($titles == 0){
+            echo '<tr align="center">';
+            for($k = 0; $k < count($attr); $k++){
+                echo '<td><b>'.$attr[$k].'</b></td>';
+            }
+            echo '</tr>';
+            $titles = 1;
+        }
         echo '<tr align="center">';
         for($i = 0; $i < count($attr); $i++){
             if(is_null($row[$attr[$i]])){
@@ -45,8 +50,14 @@ if(strlen($user_query) !== 0){
         }
         echo '</tr>';
     }
-    $result->free();
+
     echo '</tbody></table>';
+
+    if($titles == 0){
+        echo '<p>Nothing matched this query</p>';
+    }
+
+    $result->free();
 }
 $db->close();
 ?>
