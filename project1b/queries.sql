@@ -4,9 +4,13 @@ FROM Actor a, MovieActor ma, Movie m
 WHERE m.title = 'Die Another Day' AND a.id = ma.aid AND m.id = ma.mid;
 
 -- Return the number of actors who have starred in multiple movies --
-SELECT COUNT(DISTINCT ma1.aid) NumberOfActors
-FROM MovieActor ma1, MovieActor ma2
-WHERE ma1.aid = ma2.aid AND ma1.mid <> ma2.mid;
+SELECT COUNT(*)
+FROM(
+    SELECT *
+    FROM MovieActor
+    GROUP BY aid
+    HAVING COUNT(mid) > 1
+) AS G;
 
 -- Return firstname lastname for all people who are both directors and actors and no longer alive --
 SELECT CONCAT(a.first, ' ', a.last) Name
