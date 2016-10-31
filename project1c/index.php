@@ -18,7 +18,7 @@
       <a href="#" class="dropbtn">Add New Content</a>
       <div class="dropdown-content">
         <a href="add_actor_director.php">Add Actor/Director</a>
-        <a href="#">Add Movie Information</a>
+        <a href="add_movie_information.php">Add Movie Information</a>
         <a href="#">Add Movie/Actor Relation</a>
         <a href="#">Add Movie/Director Relation</a>
       </div>
