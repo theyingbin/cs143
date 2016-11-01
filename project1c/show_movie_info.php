@@ -37,7 +37,7 @@
     </li>
   </ul>
 <div class="page-content">
-  <h3>Add a Director to a Movie</h3>
+  <h3>Movie Information</h3>
 
   <?php
     $db = new mysqli('localhost', 'cs143', '', 'CS143');

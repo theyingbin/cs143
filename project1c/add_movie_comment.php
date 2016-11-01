@@ -37,7 +37,7 @@
     </li>
   </ul>
 <div class="page-content">
-  <h3>Add a Director to a Movie</h3>
+  <h3>Add a Comment to a Movie</h3>
 
   <?php
     $db = new mysqli('localhost', 'cs143', '', 'CS143');
@@ -46,9 +46,8 @@
     }
 
     $movies=$db->query("SELECT id, title, year FROM Movie ORDER BY title ASC") or die(mysqli_error($db));
-    $directors=$db->query("SELECT id, first, last, dob FROM Director ORDER BY first ASC") or die(mysqli_error($db));
     $moviesDisplay="";
-    $directorsDisplay="";
+
     while($row = $movies->fetch_array()) {
       $id = $row["id"];
       $title = $row["title"];
@@ -56,16 +55,7 @@
       $moviesDisplay .= "<option value= " . $id . ">" . $title . " (" . $year . ")</option>"; 
     }
 
-    while($row = $directors->fetch_array()) {
-        $id = $row["id"];
-        $first = $row["first"];
-        $last = $row["last"];
-        $dob = $row["dob"];
-        $directorsDisplay .= "<option value= " . $id . ">" . $first . " " . $last . " (" . $dob . ")</option>"; 
-      }
-
     $movies->free();
-    $directors->free();
   ?>
 
   <form method = "GET" action="#">
@@ -78,44 +68,53 @@
     </div>
     <br/>
     <div class="form-group">
-      <label for="director">Directors</label>
-      <select name="director">
-        <option selected disabled>Pick a Director</option>
-        <?=$directorsDisplay?>
+      <label for="name">Your Name</label>
+      <input type="text" name="name">
+    </div>
+    <br>
+    <div class="form-group">
+      <label for="rating">Rating</label>
+      <select name="rating">
+        <option selected disabled>Pick a Rating</option>
+        <option value="5">5 / 5</option>
+        <option value="4">4 / 5</option>
+        <option value="3">3 / 5</option>
+        <option value="2">2 / 5</option>
+        <option value="1">1 / 5</option>
       </select>
     </div>
-    <button type="submit" name="submit" class="btn btn-default">Add Movie Director Relation!</button>
+    <div class="form-group">
+      <textarea name="comment" rows="5" placeholder="Enter Comment Here!"></textarea>
+    </div>
+    <button type="submit" name="submit" class="btn btn-default">Add Movie Comment!</button>
   </form>
 
   <?php
-    $movieID=$_GET["movie"];
-    $directorID=$_GET["director"];
+    $movie = $_GET["movie"];
+    $name = trim($_GET["name"]);
+    $rating = $_GET["rating"];
+    $comment = trim($_GET["comment"]);
 
-
-    if ($movieID == '' && $directorID == '') {
+    if ($movie == '' && $name == '' && $rating == '' && $comment == '') {
       // Do Nothing - no query yet
-    } else if ($movieID == '') {
+    } else if ($movie == '') {
       echo "Please select a movie.";
-    } else if ($directorID == '') {
-      echo "Please select a director.";
+    } else if ($rating == '') {
+      echo "Please select a rating.";
     } else { // Valid input
-      $movieID = $db->real_escape_string($movieID);
-      $directorID = $db->real_escape_string($directorID);
+      if ($name == '') {
+        $name = "Anonymous";
+      }
+      $name = $db->real_escape_string($name);
+      $comment = $db->real_escape_string($comment);
 
-      $queryMD = $db->query("INSERT INTO MovieDirector (mid, did) VALUES ('$movieID', '$directorID')") or die(mysqli_error($db));
+      $queryMC = $db->query("INSERT INTO Review (name, time, mid, rating, comment) VALUES ('$$name', now(), '$movie', '$rating', '$comment')") or die(mysqli_error($db));
 
-      $movie = $db->query("SELECT title FROM Movie WHERE id = '$movieID'") or die(mysqli_error($db));
-      $director = $db->query("SELECT first, last FROM Director WHERE id = '$directorID'") or die(mysqli_error($db));
-
-      $movieArr = $movie->fetch_array();
-      $directorArr = $director->fetch_array();
-
-      echo "(" . $movieArr["title"] . ", " . $directorArr["first"] . " " . $directorArr["last"] . ") Pair Added!";
+      echo "Comment Added!"
+      echo "<a href=\"show_movie_info.php?id=" . $movie . "\">Go Back to the Movie</a>";
     }
 
-    $queryMD->free();
-    $movie->free();
-    $director->free();
+    $queryMC->free();
     $db->close();
   ?>
 

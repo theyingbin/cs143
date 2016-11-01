@@ -27,7 +27,7 @@
       <a href="#" class="dropbtn">Browsing Content</a>
       <div class="dropdown-content">
         <a href="#">Show Actor Information</a>
-        <a href="#">Show Movie Information</a>
+        <a href="show_movie_info.php">Show Movie Information</a>
       </div>
     </li>
     <li class="dropdown">
