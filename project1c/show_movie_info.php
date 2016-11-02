@@ -75,25 +75,32 @@
 
       $actors = $db->query("SELECT A.id, A.first, A.last, MA.role FROM Actor A, MovieActor MA WHERE $id=MA.mid AND MA.aid=A.id") or die(mysqli_error());
       while($row = $actors->fetch_assoc()) {
-        echo "<tr><td align='center'><a href=\"show_actor_info.php?id=" . $row['aid'] . "\">" . $row['first'] . " " . $row['last'] . "</a></td> align='center'<td>" . $row['role'] . "</td></tr>";
+        echo "<tr><td align='center'><a href=\"show_actor_info.php?id=" . $row['aid'] . "\">" . $row['first'] . " " . $row['last'] . "</a></td> <td align='center'>" . $row['role'] . "</td></tr>";
       }
       echo "</tbody></table></div>";
 
       echo "<h3>User Reviews</h3>";
+
       $ratings = $db->query("SELECT AVG(rating), COUNT(rating) FROM Review WHERE mid=$id") or die(mysqli_error());
       $row = $ratings->fetch_array();
-      echo "Average Review: ";
+
+      echo "<div class='table-responsive'>
+                  <table border=1 class='table table-bordered table-condensed table-hover'>
+                      <thead> <tr><td align='center'>Average Review</td></tr> </thead> 
+                      <tbody><tr><td align='center'>";
+
       if ($row[1] == 0) {
-        echo "N/A<br>";
+        echo "N/A</td></tr></tbody></table></div><br>";
         echo "Be the first to <a href=\"add_movie_comment.php?id=" . $id . "\">submit a review!</a><br>";
       } else {
-        echo $row[0] . " / 5<br>";
+        echo $row[0] . " / 5</td></tr></tbody></table></div><br>";
         echo $row[1] . " People have already reviewed - <a href=\"add_movie_comment.php?id=" . $id . "\">So why don't you!</a><br><br>";
       }
 
       echo "<div class='table-responsive'>
                   <table border=1 class='table table-bordered table-condensed table-hover'>
-                      <thead> <tr><td align='center'>Review #</td><td align='center'>Author</td><td align='center'>Rating</td><td align='center'>Comment</td></tr></thead>
+                      <thead> <tr><td align='center'>Review #</td><td align='center'>Author</td>
+                        <td align='center'>Rating</td><td align='center'>Comment</td></tr></thead>
                       <tbody>";
 
       $reviews = $db->query("SELECT name, rating, time, comment FROM Review WHERE mid=$id ORDER BY time DESC") or die(mysqli_error());
@@ -106,7 +113,6 @@
         $reviewNum--;
       }
       echo "</tbody></table></div>";
-
 
       $reviews->free();
     }
