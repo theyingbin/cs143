@@ -20,18 +20,18 @@
         <a href="add_actor_director.php">Add Actor/Director</a>
         <a href="add_movie_information.php">Add Movie Information</a>
         <a href="#">Add Movie/Actor Relation</a>
-        <a href="#">Add Movie/Director Relation</a>
+        <a href="add_movie_director_relation.php">Add Movie/Director Relation</a>
       </div>
     </li>
     <li class="dropdown">
       <a href="#" class="dropbtn">Browsing Content</a>
       <div class="dropdown-content">
         <a href="#">Show Actor Information</a>
-        <a href="#">Show Movie Information</a>
+        <a href="show_movie_info.php">Show Movie Information</a>
       </div>
     </li>
     <li class="dropdown">
-      <a href="#" class="dropbtn">Search Interface</a>
+      <a href="search.php" class="dropbtn">Search Interface</a>
       <div class="dropdown-content">
         <a href="search.php">Search Actor/Movie</a>
       </div>

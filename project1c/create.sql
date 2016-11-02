@@ -1,6 +1,6 @@
 CREATE TABLE Movie(
 	id INT, 
-	title VARCHAR(20), 
+	title VARCHAR(100), 
 	year INT, 
 	rating VARCHAR(10), 
 	company VARCHAR(50),

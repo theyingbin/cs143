@@ -31,7 +31,7 @@
       </div>
     </li>
     <li class="dropdown">
-      <a href="#" class="dropbtn">Search Interface</a>
+      <a href="search.php" class="dropbtn">Search Interface</a>
       <div class="dropdown-content">
         <a href="search.php">Search Actor/Movie</a>
       </div>
@@ -57,7 +57,7 @@
     // Do Nothing because no search query
   } else {
     echo "<h3>Matching Actors</h3>";
-    $query = "SELECT id, last, first, dob FROM Actor WHERE (first LIKE '%$words[0]%' OR last LIKE '%$words[0]%')";
+    $query = "SELECT id, last, first, dob FROM Actor WHERE (first LIKE '%$words[0]%' OR last LIKE '%$words[0]%') ORDER BY first ASC";
     for($i = 1; $i < count($words); $i++) {
       $word = $words[$i];
       $query = $query . "AND (first LIKE '%$word%' OR last LIKE '%$word%')";
@@ -72,7 +72,7 @@
     $actors->free();
 
     echo "<h3>Matching Movies</h3>";
-    $query = "SELECT id, title, year FROM Movie WHERE (title LIKE '%$words[0]%')";
+    $query = "SELECT id, title, year FROM Movie WHERE (title LIKE '%$words[0]%') ORDER BY title ASC";
     for($i = 1; $i < count($words); $i++) {
       $word = $words[$i];
       $query = $query . "AND (title LIKE '%$word%')";

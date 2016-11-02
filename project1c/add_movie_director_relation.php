@@ -30,7 +30,7 @@
       </div>
     </li>
     <li class="dropdown">
-      <a href="#" class="dropbtn">Search Interface</a>
+      <a href="search.php" class="dropbtn">Search Interface</a>
       <div class="dropdown-content">
         <a href="search.php">Search Actor/Movie</a>
       </div>

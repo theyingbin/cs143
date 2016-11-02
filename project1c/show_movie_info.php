@@ -30,7 +30,7 @@
       </div>
     </li>
     <li class="dropdown">
-      <a href="#" class="dropbtn">Search Interface</a>
+      <a href="search.php" class="dropbtn">Search Interface</a>
       <div class="dropdown-content">
         <a href="search.php">Search Actor/Movie</a>
       </div>
@@ -48,8 +48,13 @@
     $id = $_GET["id"];
 
     if ($id == '') {
-      echo "Invalid movie choice - Please select a valid movie. Thanks!";
-    } else {
+    ?>
+      <label for="search">Search for Movie Information:</label>
+        <form class="form-group" action="search.php" method ="GET">
+          <input type="text" id="search" placeholder="Search for Movie Information" name="search"><br>
+          <input type="submit" value="Search!" class="btn btn-default"><br>
+        </form>
+   <?php } else {
       $movie = $db->query("SELECT title, year, rating, company FROM Movie WHERE id=$id") or die(mysqli_error());
       $row = $movie->fetch_row();
       echo "<b>Title:</b> " . $row[0] . " (" . $row[1] . ")<br>";

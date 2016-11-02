@@ -30,7 +30,7 @@
       </div>
     </li>
     <li class="dropdown">
-      <a href="#" class="dropbtn">Search Interface</a>
+      <a href="search.php" class="dropbtn">Search Interface</a>
       <div class="dropdown-content">
         <a href="search.php">Search Actor/Movie</a>
       </div>
@@ -45,6 +45,8 @@
         die('Unable to connect to database [' . $db->connect_error . ']');
     }
 
+    $idFromURL = $_GET["id"];
+
     $movies=$db->query("SELECT id, title, year FROM Movie ORDER BY title ASC") or die(mysqli_error($db));
     $moviesDisplay="";
 
@@ -52,7 +54,11 @@
       $id = $row["id"];
       $title = $row["title"];
       $year = $row["year"];
-      $moviesDisplay .= "<option value= " . $id . ">" . $title . " (" . $year . ")</option>"; 
+      if ($idFromURL == $id) {
+        $moviesDisplay .= "<option value= " . $id . " selected>" . $title . " (" . $year . ")</option>"; 
+      } else {
+        $moviesDisplay .= "<option value= " . $id . ">" . $title . " (" . $year . ")</option>"; 
+      }
     }
 
     $movies->free();
@@ -62,7 +68,6 @@
     <div class="form-group">
       <label for="movie">Movies</label>
       <select name="movie">
-        <option selected disabled>Pick a Movie</option>
         <?=$moviesDisplay?>
       </select>
     </div>
@@ -76,11 +81,11 @@
       <label for="rating">Rating</label>
       <select name="rating">
         <option selected disabled>Pick a Rating</option>
-        <option value="5">5 / 5</option>
-        <option value="4">4 / 5</option>
-        <option value="3">3 / 5</option>
-        <option value="2">2 / 5</option>
-        <option value="1">1 / 5</option>
+        <option value="5">5/5</option>
+        <option value="4">4/5</option>
+        <option value="3">3/5</option>
+        <option value="2">2/5</option>
+        <option value="1">1/5</option>
       </select>
     </div>
     <div class="form-group">
@@ -110,7 +115,7 @@
 
       $queryMC = $db->query("INSERT INTO Review (name, time, mid, rating, comment) VALUES ('$name', now(), '$movie', '$rating', '$comment')") or die(mysqli_error($db));
 
-      echo "Comment Added!"
+      echo "Comment Added!";
       echo "<a href=\"show_movie_info.php?id=" . $movie . "\">Go Back to the Movie</a>";
     }
 
