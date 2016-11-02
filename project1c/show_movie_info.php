@@ -13,28 +13,25 @@
 
     $id = $_GET["id"];
 
-    if ($id == '') {
-    ?>
-      <label for="search">Search for Movie Information:</label>
-        <form class="form-group" action="search.php" method ="GET">
-          <input type="text" id="search" placeholder="Search for Movie Information" name="search"><br>
-          <input type="submit" value="Search!" class="btn btn-default"><br>
-        </form>
-   <?php } else {
+    if ($id != '') {
       $movie = $db->query("SELECT title, year, rating, company FROM Movie WHERE id=$id") or die(mysqli_error());
       $row = $movie->fetch_row();
-      echo "<b>Title:</b> " . $row[0] . " (" . $row[1] . ")<br>";
-      echo "<b>MPAA Rating:</b> " . $row[2] . "<br>";
-      if ($row[3] == '') {
-        echo "<b>Producer:</b> N/A <br>";
-      } else {
-        echo "<b>Producer:</b> " . $row[3] . "<br>";
-      }
-      $movie->free();
 
-      echo "<b>Directors: </b>";
+      echo "<div class='table-responsive'>
+                  <table border=1 class='table table-bordered table-condensed table-hover'>
+                      <thead> <tr><td align='center'>Title</td><td align='center'>Year</td><td align='center'>MPAA Rating</td><td align='center'>Producer</td><td align='center'>Directors</td><td align='center'>Genres</td></tr></thead>
+                      <tbody><tr>";
+      echo "<td align='center'>" . $row[0] . "</td>";
+      echo "<td align='center'>" . $row[1] . "</td>";
+      echo "<td align='center'>" . $row[2] . "</td>";
+      if($row[3] == "")
+          echo "<td align='center'> N/A </td>";
+      else
+          echo "<td align='center'>" . $row[3] . "</td>";
+      
       $directors = $db->query("SELECT D.first, D.last FROM Director D, MovieDirector MD WHERE MD.mid=$id AND MD.did=D.id") or die(mysqli_error());
       $first = true;
+      echo "<td align='center'>";
       while ($row = $directors->fetch_array()) {
         if (!$first) {
           echo ", ";
@@ -46,12 +43,11 @@
       if ($first) {
         echo "N/A";
       }
-      echo "<br>";
-      $directors->free();
+      echo "</td>";
 
-      echo "<b>Genres: </b>";
       $genres = $db->query("SELECT genre FROM MovieGenre WHERE $id=mid") or die(mysqli_error());
       $first = true;
+      echo "<td align='center'>";
       while ($row = $genres->fetch_array()) {
         if (!$first) {
           echo ", ";
@@ -63,15 +59,25 @@
       if ($first) {
         echo "N/A";
       }
-      echo "<br>";
+      echo "</td align='center'>";
+      echo "</tr></tbody></table></div>";
+
+      $movie->free();
+      $directors->free();
       $genres->free();
 
-      echo "<h3>Cast</h3>";
+      echo "<h3>Cast Information</h3>";
+
+      echo "<div class='table-responsive'>
+                  <table border=1 class='table table-bordered table-condensed table-hover'>
+                      <thead> <tr><td>Cast</td><td>Role</td></tr></thead>
+                      <tbody>";
+
       $actors = $db->query("SELECT A.id, A.first, A.last, MA.role FROM Actor A, MovieActor MA WHERE $id=MA.mid AND MA.aid=A.id") or die(mysqli_error());
       while($row = $actors->fetch_assoc()) {
-        echo "<a href=\"show_actor_info.php?id=" . $row['aid'] . "\">" . $row['first'] . " " . $row['last'] . "</a> - " . $row['role'] . "<br>";
+        echo "<tr><td align='center'><a href=\"show_actor_info.php?id=" . $row['aid'] . "\">" . $row['first'] . " " . $row['last'] . "</a></td> align='center'<td>" . $row['role'] . "</td></tr>";
       }
-      echo "<br>";
+      echo "</tbody></table></div>";
 
       echo "<h3>User Reviews</h3>";
       $ratings = $db->query("SELECT AVG(rating), COUNT(rating) FROM Review WHERE mid=$id") or die(mysqli_error());
@@ -85,18 +91,33 @@
         echo $row[1] . " People have already reviewed - <a href=\"add_movie_comment.php?id=" . $id . "\">So why don't you!</a><br><br>";
       }
 
+      echo "<div class='table-responsive'>
+                  <table border=1 class='table table-bordered table-condensed table-hover'>
+                      <thead> <tr><td align='center'>Review #</td><td align='center'>Author</td><td align='center'>Rating</td><td align='center'>Comment</td></tr></thead>
+                      <tbody>";
+
       $reviews = $db->query("SELECT name, rating, time, comment FROM Review WHERE mid=$id ORDER BY time DESC") or die(mysqli_error());
       $reviewNum = $reviews->num_rows;
       while ($row = $reviews->fetch_array()) {
-        echo "Review #" . $reviewNum . " - written by " . $row["name"] . "<br>";
-        echo "Rating: " . $row["rating"] . "<br>";
-        echo "Comment: " . $row["comment"] . "<br>";
-        echo "<br>";
+        echo "<tr><td align='center'>" . $reviewNum . "</td><td align='center'>" . $row["name"] . "</td>";
+        echo "<td align='center'>" . $row["rating"] . "</td>";
+        echo "<td align='center'>" . $row["comment"] . "</td>";
+        echo "</tr>";
         $reviewNum--;
       }
+      echo "</tbody></table></div>";
+
 
       $reviews->free();
     }
+    ?>
+    <br>
+    <label for="search">Search for Movie Information:</label>
+        <form class="form-group" action="search.php" method ="GET">
+          <input type="text" id="search" placeholder="Search for Movie Information" name="search"><br>
+          <input type="submit" value="Search!" class="btn btn-default"><br>
+        </form>
+    <?php
 
     $db->close();
   ?>

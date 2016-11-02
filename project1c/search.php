@@ -38,7 +38,7 @@
     $actors->free();
 
     echo "<h3>Matching Movies</h3>";
-    $query = "SELECT id, title, year FROM Movie WHERE (title LIKE '%$words[0]%') ORDER BY title ASC";
+    $query = "SELECT id, title, year FROM Movie WHERE (title LIKE '%$words[0]%')";
     for($i = 1; $i < count($words); $i++) {
       $word = $words[$i];
       $query .= "AND (title LIKE '%$word%')";
