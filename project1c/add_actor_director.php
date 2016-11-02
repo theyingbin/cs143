@@ -20,14 +20,14 @@
         <a href="add_actor_director.php">Add Actor/Director</a>
         <a href="add_movie_information.php">Add Movie Information</a>
         <a href="#">Add Movie/Actor Relation</a>
-        <a href="add_movie_director_relation.php">Add Movie/Director Relation</a>
+        <a href="#">Add Movie/Director Relation</a>
       </div>
     </li>
     <li class="dropdown">
       <a href="#" class="dropbtn">Browsing Content</a>
       <div class="dropdown-content">
         <a href="#">Show Actor Information</a>
-        <a href="show_movie_info.php">Show Movie Information</a>
+        <a href="#">Show Movie Information</a>
       </div>
     </li>
     <li class="dropdown">
@@ -71,29 +71,59 @@
       <button type="submit" name="submit" class="btn btn-default">Add!</button>
     </form>
 <?php
-  $is_actor=$_GET["identity"]=='Actor';
-  $first_name=$_GET["fname"];
-  $last_name=$_GET["lname"];
-  $gender=$_GET["sex"];
-  $dob_temp=$_GET["dateb"];
-  $dod_temp=$_GET["dated"];
-
-  if(isset($_GET['submit'])){
-    echo "helloworld<br>";
-    if(strlen($first_name) == 0 || strlen($last_name) == 0 || strlen($dob_temp) == 0){
-      echo "<h4>Invalid Input. A field was left empty</h4>";
-      exit(1);
-    }
-    $dob=DateTime::createFromFormat('Y-m-d', $dob_temp);
-    $dod=DateTime::createFromFormat('Y-m-d', $dod_temp);
-    if($dob==False){
-      die('<h2>invalid date format</h2>');
-    }
-    if(strlen($dod_temp) && $dod==False){
-      die('<h2>invalid date format</h2>');
-    }
-    print_r($dob);
+  $db = new mysqli('localhost', 'cs143', '', 'CS143');
+  if($db->connect_errno > 0){
+    die('Unable to connect to database [' . $db->connect_error . ']');
   }
+  $is_actor=$_GET["identity"] == 'Actor';
+  $first_name=trim($_GET["fname"]);
+  $last_name=trim($_GET["lname"]);
+  $gender=trim($_GET["sex"]);
+  $dob=trim($_GET["dateb"]);
+  $dod=trim($_GET["dated"]);
+  $dob_temp=DateTime::createFromFormat('Y-m-d', $dob);
+  $dod_temp=$dod == "" ? NULL:DateTime::createFromFormat('Y-m-d', $dod);
+
+  if($first_name == "" && $last_name == "" && $dob == "" && $dod == ""){
+    // Do Nothing
+  }
+  else if($first_name == "" || $last_name == "" || $dob == ""){
+    echo "Invalid Input. A field was left empty";
+  }
+  else if($dob_temp == False){
+    echo 'invalid date of birth format';
+  }
+  else if($dod != "" && $dod_temp == False){
+    echo 'invalid date of death format';
+  }
+  else if($dod != "" && $dod_temp != False && $dob_temp > $dod_temp){
+    echo 'Cannot die before being born';
+  }
+  else{
+    $maxIDs = $db->query("SELECT MAX(id) FROM MaxPersonID") or die(mysqli_error($db));
+    $maxID_ary = mysqli_fetch_array($maxIDs);
+    $oldMaxID = $maxID_ary[0];
+    $newMaxID = $oldMaxID + 1;
+    $first_name = $db->real_escape_string($first_name);
+    $last_name = $db->real_escape_string($last_name);
+
+    $insert_query = NULL;
+    $update_query = NULL;
+
+    if($is_actor){
+      $insert_query = $db->query("INSERT INTO Actor (id, last, first, sex, dob, dod) VALUES ($newMaxID, '$last_name', '$first_name', '$gender', '$dob', '$dod')") or die(mysqli_error($db));
+    }
+    else{
+      $insert_query = $db->query("INSERT INTO Director (id, last, first, dob, dod) VALUES ('$newMaxID', '$last_name', '$first_name', '$dob', '$dod')") or die(mysqli_error($db));
+    }
+    $update_query = $db->query("UPDATE MaxPersonID SET id=$newMaxID WHERE id=$oldMaxID") or die(mysqli_error($db));
+    
+    echo "Added";
+
+    $insert_query->free();
+    $update_query->free();
+  }
+  $db->close();
 ?>
   </div>
 </body>
