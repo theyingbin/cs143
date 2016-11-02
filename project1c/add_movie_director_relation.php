@@ -50,7 +50,6 @@
         <?=$directorsDisplay?>
       </select>
     </div>
-    <br>
     <button type="submit" name="submit" class="btn btn-default">Add Movie Director Relation!</button>
   </form>
 
