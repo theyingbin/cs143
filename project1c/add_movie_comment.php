@@ -32,7 +32,7 @@
     <li class="dropdown">
       <a href="#" class="dropbtn">Search Interface</a>
       <div class="dropdown-content">
-        <a href="#">Search Actor/Movie</a>
+        <a href="search.php">Search Actor/Movie</a>
       </div>
     </li>
   </ul>
@@ -108,7 +108,7 @@
       $name = $db->real_escape_string($name);
       $comment = $db->real_escape_string($comment);
 
-      $queryMC = $db->query("INSERT INTO Review (name, time, mid, rating, comment) VALUES ('$$name', now(), '$movie', '$rating', '$comment')") or die(mysqli_error($db));
+      $queryMC = $db->query("INSERT INTO Review (name, time, mid, rating, comment) VALUES ('$name', now(), '$movie', '$rating', '$comment')") or die(mysqli_error($db));
 
       echo "Comment Added!"
       echo "<a href=\"show_movie_info.php?id=" . $movie . "\">Go Back to the Movie</a>";

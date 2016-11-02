@@ -32,7 +32,7 @@
     <li class="dropdown">
       <a href="#" class="dropbtn">Search Interface</a>
       <div class="dropdown-content">
-        <a href="#">Search Actor/Movie</a>
+        <a href="search.php">Search Actor/Movie</a>
       </div>
     </li>
   </ul>
@@ -84,6 +84,7 @@
         <?=$directorsDisplay?>
       </select>
     </div>
+    <br>
     <button type="submit" name="submit" class="btn btn-default">Add Movie Director Relation!</button>
   </form>
 

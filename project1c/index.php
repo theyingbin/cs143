@@ -33,13 +33,14 @@
     <li class="dropdown">
       <a href="#" class="dropbtn">Search Interface</a>
       <div class="dropdown-content">
-        <a href="#">Search Actor/Movie</a>
+        <a href="search.php">Search Actor/Movie</a>
       </div>
     </li>
   </ul>
 
   <div class="page-content">
-
+	<h1>Welcome to Project 1C</h1>
+	<h2>Created by Connor Kenny and Ying Bin Wu</h2>
   </div>
 
 </body>

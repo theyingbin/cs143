@@ -32,7 +32,7 @@
     <li class="dropdown">
       <a href="#" class="dropbtn">Search Interface</a>
       <div class="dropdown-content">
-        <a href="#">Search Actor/Movie</a>
+        <a href="search.php">Search Actor/Movie</a>
       </div>
     </li>
   </ul>
@@ -127,7 +127,7 @@
 
 		echo $title . " Added!";
 	}
-  $maxIDr->free();
+  $maxIDs->free();
   $MIquery->free();
   $Gquery->free();
   $db->close();

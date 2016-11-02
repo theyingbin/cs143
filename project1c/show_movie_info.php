@@ -32,7 +32,7 @@
     <li class="dropdown">
       <a href="#" class="dropbtn">Search Interface</a>
       <div class="dropdown-content">
-        <a href="#">Search Actor/Movie</a>
+        <a href="search.php">Search Actor/Movie</a>
       </div>
     </li>
   </ul>
@@ -45,80 +45,90 @@
         die('Unable to connect to database [' . $db->connect_error . ']');
     }
 
-    $movies=$db->query("SELECT id, title, year FROM Movie ORDER BY title ASC") or die(mysqli_error($db));
-    $directors=$db->query("SELECT id, first, last, dob FROM Director ORDER BY first ASC") or die(mysqli_error($db));
-    $moviesDisplay="";
-    $directorsDisplay="";
-    while($row = $movies->fetch_array()) {
-      $id = $row["id"];
-      $title = $row["title"];
-      $year = $row["year"];
-      $moviesDisplay .= "<option value= " . $id . ">" . $title . " (" . $year . ")</option>"; 
-    }
+    $id = $_GET["id"];
 
-    while($row = $directors->fetch_array()) {
-        $id = $row["id"];
-        $first = $row["first"];
-        $last = $row["last"];
-        $dob = $row["dob"];
-        $directorsDisplay .= "<option value= " . $id . ">" . $first . " " . $last . " (" . $dob . ")</option>"; 
+    if ($id == '') {
+      echo "Invalid movie choice - Please select a valid movie. Thanks!";
+    } else {
+      $movie = $db->query("SELECT title, year, rating, company FROM Movie WHERE id=$id") or die(mysqli_error());
+      $row = $movie->fetch_row();
+      echo "<b>Title:</b> " . $row[0] . " (" . $row[1] . ")<br>";
+      echo "<b>MPAA Rating:</b> " . $row[2] . "<br>";
+      if ($row[3] == '') {
+        echo "<b>Producer:</b> N/A <br>";
+      } else {
+        echo "<b>Producer:</b> " . $row[3] . "<br>";
+      }
+      $movie->free();
+
+      echo "<b>Directors: </b>";
+      $directors = $db->query("SELECT D.first, D.last FROM Director D, MovieDirector MD WHERE MD.mid=$id AND MD.did=D.id") or die(mysqli_error());
+      $first = true;
+      while ($row = $directors->fetch_array()) {
+        if (!$first) {
+          echo ", ";
+        } else {
+          $first = false;
+        }
+        echo $row['first'] . " " . $row['last'];
+      }
+      if ($first) {
+        echo "N/A";
+      }
+      echo "<br>";
+      $directors->free();
+
+      echo "<b>Genres: </b>";
+      $genres = $db->query("SELECT genre FROM MovieGenre WHERE $id=mid") or die(mysqli_error());
+      $first = true;
+      while ($row = $genres->fetch_array()) {
+        if (!$first) {
+          echo ", ";
+        } else {
+          $first = false;
+        }
+        echo $row['genre'];
+      }
+      if ($first) {
+        echo "N/A";
+      }
+      echo "<br>";
+      $genres->free();
+
+      echo "<h3>Cast</h3>";
+      $actors = $db->query("SELECT A.id, A.first, A.last, MA.role FROM Actor A, MovieActor MA WHERE $id=MA.mid AND MA.aid=A.id") or die(mysqli_error());
+      while($row = $actors->fetch_assoc()) {
+        echo "<a href=\"showActorInfo.php?id=" . $row['aid'] . "\">" . $row['first'] . " " . $row['last'] . "</a> - " . $row['role'] . "<br>";
+      }
+      echo "<br>";
+
+      echo "<h3>User Reviews</h3>";
+      $ratings = $db->query("SELECT AVG(rating), COUNT(rating) FROM Review WHERE mid=$id") or die(mysqli_error());
+      $row = $ratings->fetch_array();
+      echo "Average Review: ";
+      if ($row[1] == 0) {
+        echo "N/A<br>";
+        echo "Be the first to <a href=\"add_movie_comment.php?id=" . $id . "\">submit a review!</a><br>";
+      } else {
+        echo $row[0] . " / 5<br>";
+        echo $row[1] . "People have already reviewed - So why don't you! <a href=\"add_movie_comment.php?id=" . $id . "\">why don't you!</a><br>";
       }
 
-    $movies->free();
-    $directors->free();
-  ?>
+      $reviews = $db->query("SELECT name, rating, time, comment FROM Review WHERE mid=$id ORDER BY time DESC") or die(mysqli_error());
+      $reviewNum = $reviews->num_rows;
+      while ($row = $reviews->fetch_array()) {
+        echo "Review #" . $reviewNum . ") written by " . $row["name"] . "<br>";
+        echo "Rating: " . $row["rating"] . "<br>";
+        echo "Comment: " . $row4["comment"] . "<br>";
+        echo "<br>";
+        $reviewNum--;
+      }
 
-  <form method = "GET" action="#">
-    <div class="form-group">
-      <label for="movie">Movies</label>
-      <select name="movie">
-        <option selected disabled>Pick a Movie</option>
-        <?=$moviesDisplay?>
-      </select>
-    </div>
-    <br/>
-    <div class="form-group">
-      <label for="director">Directors</label>
-      <select name="director">
-        <option selected disabled>Pick a Director</option>
-        <?=$directorsDisplay?>
-      </select>
-    </div>
-    <button type="submit" name="submit" class="btn btn-default">Add Movie Director Relation!</button>
-  </form>
-
-  <?php
-    $movieID=$_GET["movie"];
-    $directorID=$_GET["director"];
-
-
-    if ($movieID == '' && $directorID == '') {
-      // Do Nothing - no query yet
-    } else if ($movieID == '') {
-      echo "Please select a movie.";
-    } else if ($directorID == '') {
-      echo "Please select a director.";
-    } else { // Valid input
-      $movieID = $db->real_escape_string($movieID);
-      $directorID = $db->real_escape_string($directorID);
-
-      $queryMD = $db->query("INSERT INTO MovieDirector (mid, did) VALUES ('$movieID', '$directorID')") or die(mysqli_error($db));
-
-      $movie = $db->query("SELECT title FROM Movie WHERE id = '$movieID'") or die(mysqli_error($db));
-      $director = $db->query("SELECT first, last FROM Director WHERE id = '$directorID'") or die(mysqli_error($db));
-
-      $movieArr = $movie->fetch_array();
-      $directorArr = $director->fetch_array();
-
-      echo "(" . $movieArr["title"] . ", " . $directorArr["first"] . " " . $directorArr["last"] . ") Pair Added!";
+      $reviews->free();
     }
 
-    $queryMD->free();
-    $movie->free();
-    $director->free();
     $db->close();
   ?>
-
 </div>
 </body>
 </html>
