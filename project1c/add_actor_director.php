@@ -30,7 +30,7 @@
         <input type="text" class="form-control" placeholder="Enter DOB" name="dateb">ie: 1997-05-05<br>
       </div>
       <div class="form-group">
-        <label for="DOD">Date of Die</label>
+        <label for="DOD">Date of Death</label>
         <input type="text" class="form-control" placeholder="Enter DOD" name="dated">(leave blank if still alive)<br>
       </div>
       <button type="submit" name="submit" class="btn btn-default">Add!</button>

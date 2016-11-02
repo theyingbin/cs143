@@ -49,7 +49,7 @@
 					<input type="checkbox" name="genre[]" value="Thriller">Thriller</input>
 					<input type="checkbox" name="genre[]" value="War">War</input>
 					<input type="checkbox" name="genre[]" value="Western">Western</input>
-					<br></br>
+					<br>
       </div>
       <button type="submit" name="submit" class="btn btn-default">Add Movie Information!</button>
     </form>

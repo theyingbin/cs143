@@ -42,7 +42,6 @@
         <?=$moviesDisplay?>
       </select>
     </div>
-    <br/>
     <div class="form-group">
       <label for="director">Directors</label>
       <select name="director">

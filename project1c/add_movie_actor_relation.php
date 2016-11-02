@@ -1,43 +1,7 @@
+<?php include("navbar.php");?>
 <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
-  <title>CS143 Project 1c</title>
-
-  <link href="css/project1c.css" rel="stylesheet">
-</head>
-
+<html>
 <body>
-
-  <ul>
-    <li><a href="index.php">Home</a></li>
-    <li class="dropdown">
-      <a href="#" class="dropbtn">Add New Content</a>
-      <div class="dropdown-content">
-        <a href="add_actor_director.php">Add Actor/Director</a>
-        <a href="add_movie_information.php">Add Movie Information</a>
-        <a href="add_movie_actor_relation.php">Add Movie/Actor Relation</a>
-        <a href="add_movie_director_relation.php">Add Movie/Director Relation</a>
-      </div>
-    </li>
-    <li class="dropdown">
-      <a href="#" class="dropbtn">Browsing Content</a>
-      <div class="dropdown-content">
-        <a href="#">Show Actor Information</a>
-        <a href="show_movie_info.php">Show Movie Information</a>
-      </div>
-    </li>
-    <li class="dropdown">
-      <a href="#" class="dropbtn">Search Interface</a>
-      <div class="dropdown-content">
-        <a href="#">Search Actor/Movie</a>
-      </div>
-    </li>
-  </ul>
-
   <div class="page-content">
     <h3>Add an Actor to a Movie</h3>
     <?php
@@ -112,7 +76,7 @@
         $insert_query = $db->query("INSERT INTO MovieActor (mid, aid, role) VALUES ('$movieID', '$actorID', '$role')") or die(mysqli_error($db));
 
         $movie = $db->query("SELECT title FROM Movie WHERE id = '$movieID'") or die(mysqli_error($db));
-        $actor = $db->query("SELECT title FROM Actor WHERE id = '$actorID'") or die(mysqli_error($db));
+        $actor = $db->query("SELECT first, last FROM Actor WHERE id = '$actorID'") or die(mysqli_error($db));
 
         $movieArr = $movie->fetch_array();
         $actorArr = $actor->fetch_array();
