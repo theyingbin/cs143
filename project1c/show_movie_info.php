@@ -1,41 +1,7 @@
+<?php include("navbar.php");?>
 <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
-  <title>CS143 Project 1C</title>
-
-  <link href="css/project1c.css" rel="stylesheet">
-</head>
-
+<html>
 <body>
-  <ul>
-    <li><a href="index.php">Home</a></li>
-    <li class="dropdown">
-      <a href="#" class="dropbtn">Add New Content</a>
-      <div class="dropdown-content">
-        <a href="add_actor_director.php">Add Actor/Director</a>
-        <a href="add_movie_information.php">Add Movie Information</a>
-        <a href="#">Add Movie/Actor Relation</a>
-        <a href="add_movie_director_relation.php">Add Movie/Director Relation</a>
-      </div>
-    </li>
-    <li class="dropdown">
-      <a href="#" class="dropbtn">Browsing Content</a>
-      <div class="dropdown-content">
-        <a href="#">Show Actor Information</a>
-        <a href="show_movie_info.php">Show Movie Information</a>
-      </div>
-    </li>
-    <li class="dropdown">
-      <a href="search.php" class="dropbtn">Search Interface</a>
-      <div class="dropdown-content">
-        <a href="search.php">Search Actor/Movie</a>
-      </div>
-    </li>
-  </ul>
 <div class="page-content">
   <h3>Movie Information</h3>
 
@@ -116,15 +82,15 @@
         echo "Be the first to <a href=\"add_movie_comment.php?id=" . $id . "\">submit a review!</a><br>";
       } else {
         echo $row[0] . " / 5<br>";
-        echo $row[1] . "People have already reviewed - So why don't you! <a href=\"add_movie_comment.php?id=" . $id . "\">why don't you!</a><br>";
+        echo $row[1] . " People have already reviewed - <a href=\"add_movie_comment.php?id=" . $id . "\">So why don't you!</a><br><br>";
       }
 
       $reviews = $db->query("SELECT name, rating, time, comment FROM Review WHERE mid=$id ORDER BY time DESC") or die(mysqli_error());
       $reviewNum = $reviews->num_rows;
       while ($row = $reviews->fetch_array()) {
-        echo "Review #" . $reviewNum . ") written by " . $row["name"] . "<br>";
+        echo "Review #" . $reviewNum . " - written by " . $row["name"] . "<br>";
         echo "Rating: " . $row["rating"] . "<br>";
-        echo "Comment: " . $row4["comment"] . "<br>";
+        echo "Comment: " . $row["comment"] . "<br>";
         echo "<br>";
         $reviewNum--;
       }

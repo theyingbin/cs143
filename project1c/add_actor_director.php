@@ -1,42 +1,7 @@
+<?php include("navbar.php");?>
 <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
-  <title>CS143 Project 1C</title>
-
-  <link href="css/project1c.css" rel="stylesheet">
-</head>
-
+<html>
 <body>
-
-  <ul>
-    <li><a href="index.php">Home</a></li>
-    <li class="dropdown">
-      <a href="#" class="dropbtn">Add New Content</a>
-      <div class="dropdown-content">
-        <a href="add_actor_director.php">Add Actor/Director</a>
-        <a href="add_movie_information.php">Add Movie Information</a>
-        <a href="#">Add Movie/Actor Relation</a>
-        <a href="add_movie_director_relation.php">Add Movie/Director Relation</a>
-      </div>
-    </li>
-    <li class="dropdown">
-      <a href="#" class="dropbtn">Browsing Content</a>
-      <div class="dropdown-content">
-        <a href="#">Show Actor Information</a>
-        <a href="show_movie_info.php">Show Movie Information</a>
-      </div>
-    </li>
-    <li class="dropdown">
-      <a href="search.php" class="dropbtn">Search Interface</a>
-      <div class="dropdown-content">
-        <a href="search.php">Search Actor/Movie</a>
-      </div>
-    </li>
-  </ul>
   <div class="page-content">
     <h3>Add new Actor/Director</h3>
     <form method = "GET" action="#">
@@ -48,11 +13,11 @@
       </label>
       <div class="form-group">
         <label for="first_name">First Name</label>
-        <input type="text" class="form-control" placeholder="Text input" name="fname"/>
+        <input type="text" class="form-control" placeholder="Enter first name" name="fname"/>
       </div>
       <div class="form-group">
         <label for="last_name">Last Name</label>
-        <input type="text" class="form-control" placeholder="Text input" name="lname"/>
+        <input type="text" class="form-control" placeholder="Enter last name" name="lname"/>
       </div>
       <label class="radio-inline">
         <input type="radio" name="sex" checked="checked" value="male">Male
@@ -62,11 +27,11 @@
       </label>
       <div class="form-group">
         <label for="DOB">Date of Birth</label>
-        <input type="text" class="form-control" placeholder="Text input" name="dateb">ie: 1997-05-05<br>
+        <input type="text" class="form-control" placeholder="Enter DOB" name="dateb">ie: 1997-05-05<br>
       </div>
       <div class="form-group">
         <label for="DOD">Date of Die</label>
-        <input type="text" class="form-control" placeholder="Text input" name="dated">(leave blank if alive now)<br>
+        <input type="text" class="form-control" placeholder="Enter DOD" name="dated">(leave blank if still alive)<br>
       </div>
       <button type="submit" name="submit" class="btn btn-default">Add!</button>
     </form>

@@ -1,47 +1,14 @@
+<?php include("navbar.php");?>
 <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
-  <title>CS143 Project 1c</title>
-
-  <link href="css/project1c.css" rel="stylesheet">
-</head>
-
+<html>
 <body>
-
-  <ul>
-    <li><a href="index.php">Home</a></li>
-    <li class="dropdown">
-      <a href="#" class="dropbtn">Add New Content</a>
-      <div class="dropdown-content">
-        <a href="add_actor_director.php">Add Actor/Director</a>
-        <a href="add_movie_information.php">Add Movie Information</a>
-        <a href="#">Add Movie/Actor Relation</a>
-        <a href="add_movie_director_relation.php">Add Movie/Director Relation</a>
-      </div>
-    </li>
-    <li class="dropdown">
-      <a href="#" class="dropbtn">Browsing Content</a>
-      <div class="dropdown-content">
-        <a href="#">Show Actor Information</a>
-        <a href="show_movie_info.php">Show Movie Information</a>
-      </div>
-    </li>
-    <li class="dropdown">
-      <a href="search.php" class="dropbtn">Search Interface</a>
-      <div class="dropdown-content">
-        <a href="search.php">Search Actor/Movie</a>
-      </div>
-    </li>
-  </ul>
-
   <div class="page-content">
-	<h1>Welcome to Project 1C</h1>
-	<h2>Created by Connor Kenny and Ying Bin Wu</h2>
+	<h1 align="center">Welcome to Project 1C</h1>
+	<h2 align="center">Created by Connor Kenny and Ying Bin Wu</h2>
+  <p align="center">
+    This is a Movie Database for CS 143 taught by Professor Cho. It is supposed to mimic the basic idea behind IMDB. You can add Actors, Movies, and Relations, while also being able to search for information regarding specific Movies and Actors!
+  </p>
   </div>
-
 </body>
 </html>
+
