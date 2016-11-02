@@ -69,7 +69,7 @@
       echo "<h3>Cast</h3>";
       $actors = $db->query("SELECT A.id, A.first, A.last, MA.role FROM Actor A, MovieActor MA WHERE $id=MA.mid AND MA.aid=A.id") or die(mysqli_error());
       while($row = $actors->fetch_assoc()) {
-        echo "<a href=\"showActorInfo.php?id=" . $row['aid'] . "\">" . $row['first'] . " " . $row['last'] . "</a> - " . $row['role'] . "<br>";
+        echo "<a href=\"show_actor_info.php?id=" . $row['aid'] . "\">" . $row['first'] . " " . $row['last'] . "</a> - " . $row['role'] . "<br>";
       }
       echo "<br>";
 

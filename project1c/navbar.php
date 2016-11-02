@@ -26,7 +26,7 @@
     <li class="dropdown">
       <a href="#" class="dropbtn">Browsing Content</a>
       <div class="dropdown-content">
-        <a href="#">Show Actor Information</a>
+        <a href="show_actor_info.php">Show Actor Information</a>
         <a href="show_movie_info.php">Show Movie Information</a>
       </div>
     </li>
