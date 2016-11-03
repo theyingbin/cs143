@@ -3,7 +3,7 @@
 <html>
 <body>
   <div class="page-content">
-    <h3>Search Movies and Actors</h3>
+    <h1>Search Movies and Actors</h1>
     <p>
       <form action="search.php" method="GET">
         <input type="text" name="search" placeholder="Search Here!"></input>    
@@ -21,7 +21,6 @@
   if (trim($search) == '') {
     // Do Nothing because no search query
   } else {
-    echo "<h3>Matching Actors</h3>";
     $query = "SELECT id, last, first, dob FROM Actor WHERE (first LIKE '%$words[0]%' OR last LIKE '%$words[0]%')";
     for($i = 1; $i < count($words); $i++) {
       $word = $words[$i];
@@ -31,13 +30,23 @@
 
     $actors = $db->query($query) or die(mysqli_error());
 
-    while ($row = $actors->fetch_assoc()) {
-      echo "<a href=\"show_actor_info.php?id=" . $row["id"] . "\">" . $row["first"] . " " . $row["last"] . " (" . $row["dob"] . ")</a><br>";
-    }
+    if ($actors->num_rows > 0) {
+      echo "<h2>Matching Actors</h2>";
+      echo "<div class='table-responsive'>
+                        <table border=1 class='table table-bordered table-condensed table-hover'>
+                            <thead> <tr><td>Name</td><td>Date of Birth</td></tr></thead>
+                            <tbody>";
 
+      while ($row = $actors->fetch_assoc()) {
+        echo "<tr><td><a href=\"show_actor_info.php?id=" . $row["id"] . "\">" . $row["first"] . " " . $row["last"] . "</a></td><td><a href=\"show_actor_info.php?id=" . $row["id"] . "\">" . $row["dob"] . "</a></td></tr>";
+      }
+      echo "</tbody></table></div><hr>";
+    } else {
+      echo "<h2><b>No Matching Actors</b></h2><hr>";
+    }
+    
     $actors->free();
 
-    echo "<h3>Matching Movies</h3>";
     $query = "SELECT id, title, year FROM Movie WHERE (title LIKE '%$words[0]%')";
     for($i = 1; $i < count($words); $i++) {
       $word = $words[$i];
@@ -46,11 +55,22 @@
     $query .= "ORDER BY title ASC";
 
     $movies = $db->query($query) or die(mysqli_error());
-
-    while ($row = $movies->fetch_assoc()) {
-      echo "<a href=\"show_movie_info.php?id=" . $row["id"] . "\">" . $row["title"] . " (" . $row["year"] . ")</a><br>";
+    if ($movies->num_rows > 0) {
+      echo "<h2>Matching Movies</h2>";
+      echo "<div class='table-responsive'>
+                        <table border=1 class='table table-bordered table-condensed table-hover'>
+                            <thead> <tr><td>Title</td><td>Year</td></tr></thead>
+                            <tbody>";
+      while ($row = $movies->fetch_assoc()) {
+        echo "<tr><td><a href=\"show_movie_info.php?id=" . $row["id"] . "\">" . $row["title"] . "</a></td><td><a href=\"show_movie_info.php?id=" . $row["id"] . "\">" . $row["year"] . "</a></td></tr>";
+      }
+      echo "</tbody></table></div><hr>";
+    } else {
+      echo "<h2><b>No Matching Movies</b></h2>";
     }
     $movies->free();
+
+    
   }
   $db->free();
 ?>

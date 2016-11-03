@@ -3,7 +3,7 @@
 <html>
 <body>
   <div class="page-content">
-    <h3>Add new Actor/Director</h3>
+    <h1>Add new Actor/Director</h1>
     <form method = "GET" action="#">
       <label class="radio-inline">
         <input type="radio" checked="checked" name="identity" value="Actor"/>Actor
@@ -83,7 +83,7 @@
     }
     $update_query = $db->query("UPDATE MaxPersonID SET id=$newMaxID WHERE id=$oldMaxID") or die(mysqli_error($db));
     
-    echo "Added";
+    echo "Added!";
 
     $insert_query->free();
     $update_query->free();

@@ -3,7 +3,7 @@
 <html>
 <body>
   <div class="page-content">
-    <h3>Add new Movie Information</h3>
+    <h1>Add new Movie Information</h1>
     <form method = "GET" action="#">
       <div class="form-group">
         <label for="title">Title</label>
