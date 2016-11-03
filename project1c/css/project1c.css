@@ -68,3 +68,8 @@ body {
 .proj-navbar a:link {
     text-decoration: none;
 }
+
+#ui-dropdown{
+    position:relative;
+    z-index:1000;
+}
