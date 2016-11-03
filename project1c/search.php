@@ -69,13 +69,6 @@
       echo "<h2><b>No Matching Movies</b></h2>";
     }
     $movies->free();
-
-    echo '<p>
-      <form action="search.php" method="GET">
-        <input type="text" name="search" placeholder="Search Here!"></input>    
-        <input type="submit" value="Search!" />
-      </form>
-    </p>';
   }
   $db->free();
 ?>
