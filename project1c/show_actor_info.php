@@ -9,7 +9,7 @@
             die('Unable to connect to the database [' . $db->connect_error . ']');
         }
 
-        $id = $_GET["id"];
+        $id = trim($_GET["id"]);
 
         if($id != ""){
             $actor = $db->query("SELECT first, last, sex, dob, dod FROM Actor WHERE id=$id") or die(mysqli_error());
