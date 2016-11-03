@@ -62,7 +62,8 @@ body {
 }
 
 .page-content {
-    margin-left: 30px
+    margin-left: 30px;
+    margin-right: 30px;
 }
 
 .proj-navbar a:link {
