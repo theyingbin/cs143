@@ -7,15 +7,15 @@
     <form method = "GET" action="#">
       <div class="form-group">
         <label for="title">Title</label>
-        <input type="text" class="form-control" placeholder="Input a Title" name="title"/>
+        <input type="text" class="form-control" placeholder="Enter a Title" name="title"/>
       </div>
       <div class="form-group">
         <label for="company">Company</label>
-        <input type="text" class="form-control" placeholder="Input a Company" name="company"/>
+        <input type="text" class="form-control" placeholder="Enter a Company" name="company"/>
       </div>
       <div class="form-group">
         <label for="year">Year</label>
-        <input type="text" class="form-control" placeholder="Input a Year (ex. 2008)" name="year"/>
+        <input type="text" class="form-control" placeholder="Ex: 2008" name="year"/>
       </div>
       <div class="form-group">
         <label for="rating">MPAA Rating</label>
@@ -29,27 +29,27 @@
       </div>
       <div class="form-group">
         <label for="genre">Genre:</label>
-					<input type="checkbox" name="genre[]" value="Action">Action</input>
-					<input type="checkbox" name="genre[]" value="Adult">Adult</input>
-					<input type="checkbox" name="genre[]" value="Adventure">Adventure</input>
-					<input type="checkbox" name="genre[]" value="Animation">Animation</input>
-					<input type="checkbox" name="genre[]" value="Comedy">Comedy</input>
-					<input type="checkbox" name="genre[]" value="Crime">Crime</input>
-					<input type="checkbox" name="genre[]" value="Documentary">Documentary</input>
-					<input type="checkbox" name="genre[]" value="Drama">Drama</input>
-					<input type="checkbox" name="genre[]" value="Family">Family</input>
-					<input type="checkbox" name="genre[]" value="Fantasy">Fantasy</input>
-					<br>
-					<input type="checkbox" name="genre[]" value="Horror">Horror</input>
-					<input type="checkbox" name="genre[]" value="Musical">Musical</input>
-					<input type="checkbox" name="genre[]" value="Mystery">Mystery</input>
-					<input type="checkbox" name="genre[]" value="Romance">Romance</input>
-					<input type="checkbox" name="genre[]" value="Sci-Fi">Sci-Fi</input>				
-					<input type="checkbox" name="genre[]" value="Short">Short</input>
-					<input type="checkbox" name="genre[]" value="Thriller">Thriller</input>
-					<input type="checkbox" name="genre[]" value="War">War</input>
-					<input type="checkbox" name="genre[]" value="Western">Western</input>
-					<br>
+			<input type="checkbox" name="genre[]" value="Action">Action</input>
+			<input type="checkbox" name="genre[]" value="Adult">Adult</input>
+			<input type="checkbox" name="genre[]" value="Adventure">Adventure</input>
+			<input type="checkbox" name="genre[]" value="Animation">Animation</input>
+			<input type="checkbox" name="genre[]" value="Comedy">Comedy</input>
+			<input type="checkbox" name="genre[]" value="Crime">Crime</input>
+			<input type="checkbox" name="genre[]" value="Documentary">Documentary</input>
+			<input type="checkbox" name="genre[]" value="Drama">Drama</input>
+			<input type="checkbox" name="genre[]" value="Family">Family</input>
+			<input type="checkbox" name="genre[]" value="Fantasy">Fantasy</input>
+			<br>
+			<input type="checkbox" name="genre[]" value="Horror">Horror</input>
+			<input type="checkbox" name="genre[]" value="Musical">Musical</input>
+			<input type="checkbox" name="genre[]" value="Mystery">Mystery</input>
+			<input type="checkbox" name="genre[]" value="Romance">Romance</input>
+			<input type="checkbox" name="genre[]" value="Sci-Fi">Sci-Fi</input>				
+			<input type="checkbox" name="genre[]" value="Short">Short</input>
+			<input type="checkbox" name="genre[]" value="Thriller">Thriller</input>
+			<input type="checkbox" name="genre[]" value="War">War</input>
+			<input type="checkbox" name="genre[]" value="Western">Western</input>
+			<br>
       </div>
       <button type="submit" name="submit" class="btn btn-default">Add Movie Information!</button>
     </form>

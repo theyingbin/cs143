@@ -27,11 +27,11 @@
       </label>
       <div class="form-group">
         <label for="DOB">Date of Birth</label>
-        <input type="text" class="form-control" placeholder="Enter DOB" name="dateb">ie: 1997-05-05<br>
+        <input type="text" class="form-control" placeholder="Ex: 1997-05-05" name="dateb"><br>
       </div>
       <div class="form-group">
         <label for="DOD">Date of Death</label>
-        <input type="text" class="form-control" placeholder="Enter DOD" name="dated">(leave blank if still alive)<br>
+        <input type="text" class="form-control" placeholder="Leave Blank if Still Alive" name="dated"><br>
       </div>
       <button type="submit" name="submit" class="btn btn-default">Add!</button>
     </form>
