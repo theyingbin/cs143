@@ -19,7 +19,7 @@
 
       echo "<div class='table-responsive'>
                   <table border=1 class='table table-bordered table-condensed table-hover'>
-                      <thead> <tr><td align='center'>Title</td><td align='center'>Year</td><td align='center'>MPAA Rating</td><td align='center'>Producer</td><td align='center'>Directors</td><td align='center'>Genres</td></tr></thead>
+                      <thead> <tr><td align='center'><b>Title</b></td><td align='center'><b>Year</b></td><td align='center'><b>MPAA Rating</b></td><td align='center'><b>Producer</b></td><td align='center'><b>Directors</b></td><td align='center'><b>Genres</b></td></tr></thead>
                       <tbody><tr>";
       echo "<td align='center'>" . $row[0] . "</td>";
       echo "<td align='center'>" . $row[1] . "</td>";
@@ -74,7 +74,7 @@
 
         echo "<div class='table-responsive'>
                   <table border=1 class='table table-bordered table-condensed table-hover'>
-                      <thead> <tr><td>Cast</td><td>Role</td></tr></thead>
+                      <thead> <tr><td align='center'><b>Cast</b></td><td align='center'><b>Role</b></td></tr></thead>
                       <tbody>";
 
       
@@ -94,15 +94,15 @@
 
       echo "<div class='table-responsive'>
                 <table border=1 class='table table-bordered table-condensed table-hover'>
-                    <thead> <tr><td align='center'>Average Review</td></tr> </thead> 
+                    <thead> <tr><td align='center'><b>Average Review</b></td></tr> </thead> 
                     <tbody><tr><td align='center'>";
 
       if ($row[1] == 0) {
         echo "N/A</td></tr></tbody></table></div>";
-        echo "Be the first to <a href='add_movie_comment.php?id=" . $id . "'>submit a review!</a><br>";
+        echo "<h4>Be the first to <a href='add_movie_comment.php?id=" . $id . "'>submit a review!</a></h4>";
       } else {
-        echo $row[0] . " / 5</td></tr></tbody></table></div><br>";
-        echo "<b>" . $row[1] . " People</b> have already reviewed - <a href='add_movie_comment.php?id=" . $id . "'>So why don't you!</a><br><br>";
+        echo $row[0] . " / 5</td></tr></tbody></table></div>";
+        echo "<h4><b>" . $row[1] . " People</b> have already reviewed - <a href='add_movie_comment.php?id=" . $id . "'>So why don't you!</a></h4><br>";
       }
 
       $reviews = $db->query("SELECT name, rating, time, comment FROM Review WHERE mid=$id ORDER BY time DESC") or die(mysqli_error());
@@ -110,8 +110,8 @@
       if ($reviews->num_rows > 0) {
         echo "<div class='table-responsive'>
                   <table border=1 class='table table-bordered table-condensed table-hover'>
-                      <thead> <tr><td align='center'>Review #</td><td align='center'>Author</td>
-                        <td align='center'>Rating</td><td align='center'>Comment</td></tr></thead>
+                      <thead> <tr><td align='center'><b>Review #</b></td><td align='center'><b>Author</b></td>
+                        <td align='center'><b>Rating</b></td><td align='center'><b>Comment</b></td></tr></thead>
                       <tbody>";
 
         $reviewNum = $reviews->num_rows;

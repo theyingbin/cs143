@@ -29,27 +29,28 @@
       </div>
       <div class="form-group">
         <label for="genre">Genre:</label>
-			<input type="checkbox" name="genre[]" value="Action">Action</input>
-			<input type="checkbox" name="genre[]" value="Adult">Adult</input>
-			<input type="checkbox" name="genre[]" value="Adventure">Adventure</input>
-			<input type="checkbox" name="genre[]" value="Animation">Animation</input>
-			<input type="checkbox" name="genre[]" value="Comedy">Comedy</input>
-			<input type="checkbox" name="genre[]" value="Crime">Crime</input>
-			<input type="checkbox" name="genre[]" value="Documentary">Documentary</input>
-			<input type="checkbox" name="genre[]" value="Drama">Drama</input>
-			<input type="checkbox" name="genre[]" value="Family">Family</input>
-			<input type="checkbox" name="genre[]" value="Fantasy">Fantasy</input>
-			<br>
-			<input type="checkbox" name="genre[]" value="Horror">Horror</input>
-			<input type="checkbox" name="genre[]" value="Musical">Musical</input>
-			<input type="checkbox" name="genre[]" value="Mystery">Mystery</input>
-			<input type="checkbox" name="genre[]" value="Romance">Romance</input>
-			<input type="checkbox" name="genre[]" value="Sci-Fi">Sci-Fi</input>				
-			<input type="checkbox" name="genre[]" value="Short">Short</input>
-			<input type="checkbox" name="genre[]" value="Thriller">Thriller</input>
-			<input type="checkbox" name="genre[]" value="War">War</input>
-			<input type="checkbox" name="genre[]" value="Western">Western</input>
-			<br>
+        	<div class="checkbox">
+				<label><input type="checkbox" name="genre[]" value="Action">Action</input></label>
+				<label><input type="checkbox" name="genre[]" value="Adult">Adult</input></label>
+				<label><input type="checkbox" name="genre[]" value="Adventure">Adventure</input></label>
+				<label><input type="checkbox" name="genre[]" value="Animation">Animation</input></label>
+				<label><input type="checkbox" name="genre[]" value="Comedy">Comedy</input></label>
+				<label><input type="checkbox" name="genre[]" value="Crime">Crime</input></label>
+				<label><input type="checkbox" name="genre[]" value="Documentary">Documentary</input></label>
+				<label><input type="checkbox" name="genre[]" value="Drama">Drama</input></label>
+				<label><input type="checkbox" name="genre[]" value="Family">Family</input></label>
+			</div>
+			<div class="checkbox">
+				<label><input type="checkbox" name="genre[]" value="Fantasy">Fantasy</input></label>
+				<label><input type="checkbox" name="genre[]" value="Musical">Musical</input></label>
+				<label><input type="checkbox" name="genre[]" value="Mystery">Mystery</input></label>
+				<label><input type="checkbox" name="genre[]" value="Romance">Romance</input></label>
+				<label><input type="checkbox" name="genre[]" value="Sci-Fi">Sci-Fi</input></label>
+				<label><input type="checkbox" name="genre[]" value="Short">Short</input></label>
+				<label><input type="checkbox" name="genre[]" value="Thriller">Thriller</input></label>
+				<label><input type="checkbox" name="genre[]" value="War">War</input></label>
+				<label><input type="checkbox" name="genre[]" value="Western">Western</input></label>
+			</div>
       </div>
       <button type="submit" name="submit" class="btn btn-default">Add Movie Information!</button>
     </form>
@@ -68,11 +69,11 @@
 	if ($title == '' && $company == '' && $year == '' && $rating == '' && count($genre) == 0) {
 		// Do Nothing - no query yet
 	} else if ($title == '') {
-		echo "Please enter a valid title.";
+		echo "<h4>Please enter a valid title.</h4>";
 	} else if ($company == '') {
-		echo "Please enter a valid company.";
+		echo "<h4>Please enter a valid company.</h4>";
 	} else if ($year == '' || $year <= 1500 || $year >= 2100) {
-		echo "Please enter a valid year.";	
+		echo "<h4>Please enter a valid year.</h4>";	
 	} else { // Valid input
 		$maxIDs = $db->query("SELECT MAX(id) FROM MaxMovieID") or die(mysqli_error($db));
 
@@ -91,7 +92,7 @@
 			$Gquery = $db->query("INSERT INTO MovieGenre (mid, genre) VALUES ('$newMaxID', '$genre[$i]')") or die(mysqli_error($db));
 		}
 
-		echo $title . " Added!";
+		echo "<h4>Added " . $title . "!</h4>";
 	}
   $maxIDs->free();
   $MIquery->free();

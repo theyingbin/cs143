@@ -36,14 +36,14 @@
 
   <form method = "GET" action="#">
     <div class="form-group">
-      <label for="movie">Movies</label>
+      <label for="movie">Movie:</label>
       <select name="movie">
         <option selected disabled>Pick a Movie</option>
         <?=$moviesDisplay?>
       </select>
     </div>
     <div class="form-group">
-      <label for="director">Directors</label>
+      <label for="director">Director:</label>
       <select name="director">
         <option selected disabled>Pick a Director</option>
         <?=$directorsDisplay?>
@@ -60,9 +60,9 @@
     if ($movieID == '' && $directorID == '') {
       // Do Nothing - no query yet
     } else if ($movieID == '') {
-      echo "Please select a movie.";
+      echo "<h4>Please select a movie.</h4>";
     } else if ($directorID == '') {
-      echo "Please select a director.";
+      echo "<h4>Please select a director.</h4>";
     } else { // Valid input
       $movieID = $db->real_escape_string($movieID);
       $directorID = $db->real_escape_string($directorID);
@@ -75,7 +75,7 @@
       $movieArr = $movie->fetch_array();
       $directorArr = $director->fetch_array();
 
-      echo "(" . $movieArr["title"] . ", " . $directorArr["first"] . " " . $directorArr["last"] . ") Pair Added!";
+      echo "<h4>Added (" . $movieArr["title"] . ", " . $directorArr["first"] . " " . $directorArr["last"] .  ") Relation!</h4>";
     }
 
     $queryMD->free();

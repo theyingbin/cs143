@@ -3,7 +3,7 @@
 <html>
 <body>
 <div class="page-content">
-  <h3>Add a Comment to a Movie</h3>
+  <h1>Add a Comment to a Movie</h1>
 
   <?php
     $db = new mysqli('localhost', 'cs143', '', 'CS143');
@@ -32,19 +32,17 @@
 
   <form method = "GET" action="#">
     <div class="form-group">
-      <label for="movie">Movies</label>
+      <label for="movie">Movies:</label>
       <select name="movie">
         <?=$moviesDisplay?>
       </select>
     </div>
-    <br/>
     <div class="form-group">
-      <label for="name">Your Name</label>
+      <label for="name">Your Name:</label>
       <input type="text" name="name">
     </div>
-    <br>
     <div class="form-group">
-      <label for="rating">Rating</label>
+      <label for="rating">Rating:</label>
       <select name="rating">
         <option selected disabled>Pick a Rating</option>
         <option value="5">5/5</option>
@@ -55,7 +53,7 @@
       </select>
     </div>
     <div class="form-group">
-      <textarea name="comment" rows="5" placeholder="Enter Comment Here!"></textarea>
+      <textarea name="comment" rows="5" cols="100" placeholder="Enter Your Movie Comment Here!"></textarea>
     </div>
     <button type="submit" name="submit" class="btn btn-default">Add Movie Comment!</button>
   </form>
@@ -69,9 +67,9 @@
     if ($movie == '' && $name == '' && $rating == '' && $comment == '') {
       // Do Nothing - no query yet
     } else if ($movie == '') {
-      echo "Please select a movie.";
+      echo "<h4>Please select a movie.</h4>";
     } else if ($rating == '') {
-      echo "Please select a rating.";
+      echo "<h4>Please select a rating.</h4>";
     } else { // Valid input
       if ($name == '') {
         $name = "Anonymous";
@@ -81,8 +79,8 @@
 
       $queryMC = $db->query("INSERT INTO Review (name, time, mid, rating, comment) VALUES ('$name', now(), '$movie', '$rating', '$comment')") or die(mysqli_error($db));
 
-      echo "Comment Added!<br>";
-      echo "<a href=\"show_movie_info.php?id=" . $movie . "\">Go Back to the Movie</a>";
+      echo "<h4>Added Comment!</h4>";
+      echo "<h5><a href=\"show_movie_info.php?id=" . $movie . "\">Go Back to the Movie</a><h5>";
     }
 
     $queryMC->free();

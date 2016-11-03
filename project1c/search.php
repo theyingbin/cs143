@@ -29,6 +29,8 @@
     $query .= "ORDER BY first ASC";
 
     $actors = $db->query($query) or die(mysqli_error());
+    
+    echo "<hr>";
 
     if ($actors->num_rows > 0) {
       echo "<h2>Matching Actors</h2>";
@@ -42,7 +44,7 @@
       }
       echo "</tbody></table></div><hr>";
     } else {
-      echo "<h2><b>No Matching Actors</b></h2><hr>";
+      echo "<h2>No Matching Actors</h2><hr>";
     }
     
     $actors->free();
@@ -66,16 +68,10 @@
       }
       echo "</tbody></table></div>";
     } else {
-      echo "<h2><b>No Matching Movies</b></h2>";
+      echo "<h2>No Matching Movies</h2>";
     }
     $movies->free();
 
-    echo '<p>
-      <form action="search.php" method="GET">
-        <input type="text" name="search" placeholder="Search Here!"></input>    
-        <input type="submit" value="Search!" />
-      </form>
-    </p>';
   }
   $db->free();
 ?>

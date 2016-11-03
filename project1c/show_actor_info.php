@@ -16,7 +16,7 @@
             $row = $actor->fetch_row();
             echo "<div class='table-responsive'>
                         <table border=1 class='table table-bordered table-condensed table-hover'>
-                            <thead> <tr><td align='center'>Name</td><td align='center'>Sex</td><td align='center'>Date of Birth</td><td align='center'>Date of Death</td></tr></thead>
+                            <thead> <tr><td align='center'><b>Name</b></td><td align='center'><b>Sex</b></td><td align='center'><b>Date of Birth</b></td><td align='center'><b>Date of Death</b></td></tr></thead>
                             <tbody><tr>";
             echo "<td align='center'>".$row[0]." ".$row[1]."</td>";
             echo "<td align='center'>".$row[2]."</td>";
@@ -29,9 +29,9 @@
             
             $actor_movies = $db->query("SELECT role, title, mid FROM MovieActor, Movie WHERE $id=aid AND mid=id") or die(mysqli_error());
             if ($actor_movies->num_rows > 0) {
-                echo "<hr><h2><b>Actor's Movies and Role</b></h2>";
+                echo "<hr><h2>Actor's Movies and Role</h2>";
                 echo "<div class='table-responsive'>
-                    <table border=1 class='table table-bordered table-condensed table-hover'><thead> <tr><td align='center'>Role</td><td align='center'>Movie Title</td></thead></tr>
+                    <table border=1 class='table table-bordered table-condensed table-hover'><thead> <tr><td align='center'><b>Role</b></td><td align='center'><b>Movie Title</b></td></thead></tr>
                     <tbody>";
                 while($row = $actor_movies->fetch_array()){
                     echo "<tr><td align='center'>" . $row['role'] . "</td>";
@@ -39,7 +39,7 @@
                 }
                 echo "</tbody></table></div><hr>";
             } else {
-                echo "<h3><b>No Movie Information Available for " . $row[0] . " " . $row[1] . "</b></h3>";
+                echo "<h3>No Movie Information Available for " . $row[0] . " " . $row[1] . "</h3><hr>";
             }
             
             $actor->free();

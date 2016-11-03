@@ -3,7 +3,7 @@
 <html>
 <body>
   <div class="page-content">
-    <h3>Add an Actor to a Movie</h3>
+    <h1>Add an Actor to a Movie</h1>
     <?php
       $db = new mysqli('localhost', 'cs143', '', 'CS143');
       if($db->connect_errno > 0){
@@ -35,14 +35,14 @@
     ?>
     <form method = "GET" action="#">
       <div class="form-group">
-        <label for="movie">Movies</label>
+        <label for="movie">Movie:</label>
         <select name="movie">
           <option selected disabled>Pick a Movie</option>
           <?=$moviesDisplay?>
         </select>
       </div>
       <div class="form-group">
-        <label for="actor">Actors</label>
+        <label for="actor">Actor:</label>
         <select name="actor">
           <option selected disabled>Pick a Actor</option>
           <?=$actorsDisplay?>
@@ -52,7 +52,7 @@
         <label for="role">Role:</label>
         <input type='text' name='role' class="form-control" >
         <br>
-        <input type='submit' class="btn btn-default" value='Click me!'>
+        <input type='submit' class="btn btn-default" value='Add Movie Actor Relation!'>
       </div>
     </form>
     <?php
@@ -63,11 +63,11 @@
       if($movieID == "" && $actorID == "" && $role == "" ){
         // Do nothing
       } else if($movieID == ""){
-        echo "Please select a movie.<br>";
+        echo "<h4>Please select a movie.</h4>";
       } else if($actorID == ""){
-        echo "Please select an actor.<br>";
+        echo "<h4>Please select an actor.</h4>";
       } else if($role == ""){
-        echo "Actor must have a role. <br>";
+        echo "<h4>Actor must have a role.</h4>";
       } else{
         $movieID = $db->real_escape_string($movieID);
         $actorID = $db->real_escape_string($actorID);
@@ -81,13 +81,14 @@
         $movieArr = $movie->fetch_array();
         $actorArr = $actor->fetch_array();
 
-        echo "(" . $movieArr["title"] . ", " . $actorArr["first"] . " " . $actorArr["last"] . ") Pair Added!";
+        echo "<h4>Added (" . $movieArr["title"] . ", " . $actorArr["first"] . " " . $actorArr["last"] . ") Relation!</h4>";
 
         $insert_query->free();
         $movie->free();
         $actor->free();
-        $db->close();
       }
+      $db->close();
+
     ?>
   </div>
 
