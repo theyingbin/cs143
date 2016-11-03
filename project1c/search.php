@@ -34,11 +34,11 @@
       echo "<h2>Matching Actors</h2>";
       echo "<div class='table-responsive'>
                         <table border=1 class='table table-bordered table-condensed table-hover'>
-                            <thead> <tr><td>Name</td><td>Date of Birth</td></tr></thead>
+                            <thead> <tr><td align='center'>Name</td><td align='center'>Date of Birth</td></tr></thead>
                             <tbody>";
 
       while ($row = $actors->fetch_assoc()) {
-        echo "<tr><td><a href=\"show_actor_info.php?id=" . $row["id"] . "\">" . $row["first"] . " " . $row["last"] . "</a></td><td><a href=\"show_actor_info.php?id=" . $row["id"] . "\">" . $row["dob"] . "</a></td></tr>";
+        echo "<tr><td align='center'><a href=\"show_actor_info.php?id=" . $row["id"] . "\">" . $row["first"] . " " . $row["last"] . "</a></td><td align='center'><a href=\"show_actor_info.php?id=" . $row["id"] . "\">" . $row["dob"] . "</a></td></tr>";
       }
       echo "</tbody></table></div><hr>";
     } else {
@@ -59,21 +59,27 @@
       echo "<h2>Matching Movies</h2>";
       echo "<div class='table-responsive'>
                         <table border=1 class='table table-bordered table-condensed table-hover'>
-                            <thead> <tr><td>Title</td><td>Year</td></tr></thead>
+                            <thead> <tr><td align='center'>Title</td><td align='center'>Year</td></tr></thead>
                             <tbody>";
       while ($row = $movies->fetch_assoc()) {
-        echo "<tr><td><a href=\"show_movie_info.php?id=" . $row["id"] . "\">" . $row["title"] . "</a></td><td><a href=\"show_movie_info.php?id=" . $row["id"] . "\">" . $row["year"] . "</a></td></tr>";
+        echo "<tr><td align='center'><a href=\"show_movie_info.php?id=" . $row["id"] . "\">" . $row["title"] . "</a></td><td align='center'><a href=\"show_movie_info.php?id=" . $row["id"] . "\">" . $row["year"] . "</a></td></tr>";
       }
-      echo "</tbody></table></div><hr>";
+      echo "</tbody></table></div>";
     } else {
       echo "<h2><b>No Matching Movies</b></h2>";
     }
     $movies->free();
 
-    
+    echo '<p>
+      <form action="search.php" method="GET">
+        <input type="text" name="search" placeholder="Search Here!"></input>    
+        <input type="submit" value="Search!" />
+      </form>
+    </p>';
   }
   $db->free();
 ?>
+  
 </div>
 </body>
 </html>
