@@ -40,11 +40,13 @@
 
         }
     ?>
-        <label for="search">Search for Actor Information:</label>
-        <form class="form-group" action="search.php" method="GET">
-            <input type="text" id="search" placeholder="Search for Actor Information" name="search"><br>
-            <input type="submit" value="Search!" class="btn btn-default"><br>
+        <p>
+        <form action="search.php" method="GET">
+            <input type="text" name="search" placeholder="Search for Actor Information"></input>    
+            <input type="submit" value="Search!" />
         </form>
+        </p>
+
     </div>
 </body>
 </html>

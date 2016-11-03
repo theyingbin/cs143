@@ -117,12 +117,12 @@
       $reviews->free();
     }
     ?>
-    <br>
-    <label for="search">Search for Movie Information:</label>
-        <form class="form-group" action="search.php" method ="GET">
-          <input type="text" id="search" placeholder="Search for Movie Information" name="search"><br>
-          <input type="submit" value="Search!" class="btn btn-default"><br>
-        </form>
+    <p>
+      <form action="search.php" method="GET">
+        <input type="text" name="search" placeholder="Search for Movie Information"></input>    
+        <input type="submit" value="Search!" />
+      </form>
+    </p>
     <?php
 
     $db->close();
