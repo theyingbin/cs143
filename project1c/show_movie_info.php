@@ -79,7 +79,7 @@
 
       
         while($row = $actors->fetch_assoc()) {
-          echo "<tr><td align='center'><a href=\"show_actor_info.php?id=" . $row['aid'] . "\">" . $row['first'] . " " . $row['last'] . "</a></td> <td align='center'>" . $row['role'] . "</td></tr>";
+          echo "<tr><td align='center'><a href='show_actor_info.php?id=" . $row['id'] . "'>" . $row['first'] . " " . $row['last'] . "</a></td> <td align='center'>" . $row['role'] . "</td></tr>";
         }
         echo "</tbody></table></div><hr>";
       } else {
@@ -99,10 +99,10 @@
 
       if ($row[1] == 0) {
         echo "N/A</td></tr></tbody></table></div>";
-        echo "Be the first to <a href=\"add_movie_comment.php?id=" . $id . "\">submit a review!</a><br>";
+        echo "Be the first to <a href='add_movie_comment.php?id=" . $id . "'>submit a review!</a><br>";
       } else {
         echo $row[0] . " / 5</td></tr></tbody></table></div><br>";
-        echo "<b>" . $row[1] . " People</b> have already reviewed - <a href=\"add_movie_comment.php?id=" . $id . "\">So why don't you!</a><br><br>";
+        echo "<b>" . $row[1] . " People</b> have already reviewed - <a href='add_movie_comment.php?id=" . $id . "'>So why don't you!</a><br><br>";
       }
 
       $reviews = $db->query("SELECT name, rating, time, comment FROM Review WHERE mid=$id ORDER BY time DESC") or die(mysqli_error());
