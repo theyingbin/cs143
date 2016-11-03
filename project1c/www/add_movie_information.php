@@ -42,6 +42,7 @@
 			</div>
 			<div class="checkbox">
 				<label><input type="checkbox" name="genre[]" value="Fantasy">Fantasy</input></label>
+				<label><input type="checkbox" name="genre[]" value="Horror">Horror</input></label>
 				<label><input type="checkbox" name="genre[]" value="Musical">Musical</input></label>
 				<label><input type="checkbox" name="genre[]" value="Mystery">Mystery</input></label>
 				<label><input type="checkbox" name="genre[]" value="Romance">Romance</input></label>

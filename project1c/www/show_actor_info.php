@@ -21,7 +21,7 @@
             echo "<td align='center'>".$row[0]." ".$row[1]."</td>";
             echo "<td align='center'>".$row[2]."</td>";
             echo "<td align='center'>".$row[3]."</td>";
-            if($row[4] == "")
+            if($row[4] == "" || $row[4] == "0000-00-00")
                 echo "<td align='center'> N/A </td>";
             else
                 echo "<td align='center'>".$row[4]."</td>";
