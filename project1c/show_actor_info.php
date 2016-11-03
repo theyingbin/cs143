@@ -35,7 +35,7 @@
                     <tbody>";
                 while($row = $actor_movies->fetch_array()){
                     echo "<tr><td align='center'>" . $row['role'] . "</td>";
-                    echo "<td align='center'><a href='show_movie_info.php?identidier='" . $row['mid']. '>' .$row['title'].'</a>'.'</td></tr>';
+                    echo "<td align='center'><a href='show_movie_info.php?id=" . $row['mid']. "'>" .$row['title'].'</a>'.'</td></tr>';
                 }
                 echo "</tbody></table></div><hr>";
             } else {
