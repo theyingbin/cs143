@@ -70,7 +70,24 @@ RC BTLeafNode::insertAndSplit(int key, const RecordId& rid,
  * @return 0 if searchKey is found. Otherwise return an error code.
  */
 RC BTLeafNode::locate(int searchKey, int& eid)
-{ return 0; }
+{
+    int indexSize = sizeof(RecordId) + sizeof(int);     // gets the size of every pair of RecordId and int
+    for(int i=0; i<numKeys; i++){
+        int checkPtr* = (int*)(buffer + i*indexSize);
+
+        if(*checkPtr == searchKey){
+            eid = i;
+            return 0;
+        }
+        else if(*checkPtr > searchKey){
+            eid = i;
+            return RC_NO_SUCH_RECORD;
+        }
+    }
+
+    eid = numKeys;
+    return RC_NO_SUCH_RECORD;
+}
 
 /*
  * Read the (key, rid) pair from the eid entry.
