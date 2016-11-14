@@ -142,20 +142,21 @@ RC SqlEngine::load(const string& table, const string& loadfile, bool index)
     while(getline(input, loadTuple)){
       int key;
       string value;
-      if(parseLoadLine(loadTuple, key, value)){
+      RC returnCode;
+      if(returnCode = parseLoadLine(loadTuple, key, value)){
         // badly formatted data
-        return 1;
+        return returnCode;
       }
-      if(record.append(key, value, rid)){
+      if(returnCode = record.append(key, value, rid)){
         // cannot append input
-        return 2;
+        return returnCode;
       }
     }
     input.close();
   }
   else{
     // cannot open file. probably because it doesn't exist or no read permissions
-    return 3;
+    return RC_FILE_OPEN_FAILED;
   }
   return 0;
 }
