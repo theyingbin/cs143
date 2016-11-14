@@ -48,7 +48,7 @@ RC BTLeafNode::insert(int key, const RecordId& rid)
 
 	int numEntriesAllowed = (PageFile::PAGE_SIZE - sizeof(PageId)) / entrySize;
 
-	if(getKeyCount() + 1 > numEntriesAllowed) {
+	if(numKeys + 1 > numEntriesAllowed) {
 		return RC_NODE_FULL;
 	}
 
@@ -76,8 +76,8 @@ RC BTLeafNode::insert(int key, const RecordId& rid)
 	memcpy(nextBuffer + i + sizeof(RecordId), &key, sizeof(int));
 
 	// After we insert our entry, copy the rest in
-	// getKeyCount() * entrySize - i gives entries after insert
-	memcpy(nextBuffer + i + entrySize, buffer + i, getKeyCount() * entrySize - i);
+	// numKeys * entrySize - i gives entries after insert
+	memcpy(nextBuffer + i + entrySize, buffer + i, numKeys * entrySize - i);
 
 	// Add in nextNodePtr at the end
 	PageId nextNodePtr = getNextNodePtr();
@@ -108,20 +108,20 @@ RC BTLeafNode::insertAndSplit(int key, const RecordId& rid,
 
 	int numEntriesAllowed = (PageFile::PAGE_SIZE - sizeof(PageId)) / entrySize;
 
-	if (getKeyCount() < numEntriesAllowed)
+	if (numKeys < numEntriesAllowed)
 		return RC_INVALID_FILE_FORMAT;
 
-	if (sibling.getKeyCount() != 0)
+	if (sibling.numKeys != 0)
 		return RC_INVALID_ATTRIBUTE;
 
 	memset(sibling.buffer, 0, PageFile::PAGE_SIZE);
 
-	int halfKeys = (getKeyCount()+1) / 2;
+	int halfKeys = (numKeys+1) / 2;
 	int halfIndex = halfKeys * entrySize;
 
 	memcpy(sibling.buffer, buffer + halfIndex, PageFile::PAGE_SIZE - sizeof(PageId) - halfIndex);
 
-	sibling.numKeys = getKeyCount() - halfKeys;
+	sibling.numKeys = numKeys - halfKeys;
 	sibling.setNextNodePtr(getNextNodePtr());
 
 	memset(buffer + halfIndex, 0, PageFile::PAGE_SIZE - sizeof(PageId));
@@ -220,7 +220,6 @@ RC BTLeafNode::setNextNodePtr(PageId pid)
 }
 
 
-
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
@@ -272,7 +271,7 @@ RC BTNonLeafNode::insert(int key, PageId pid)
 
 	int numEntriesAllowed = (PageFile::PAGE_SIZE - sizeof(PageId)) / entrySize;
 
-	if(getKeyCount() + 1 > numEntriesAllowed) {
+	if(numKeys + 1 > numEntriesAllowed) {
 		return RC_NODE_FULL;
 	}
 
@@ -302,8 +301,8 @@ RC BTNonLeafNode::insert(int key, PageId pid)
 	memcpy(nextBuffer + i + sizeof(PageId), &key, sizeof(int));
 
 	// After we insert our entry, copy the rest in
-	// getKeyCount() * entrySize - i gives entries after insert
-	memcpy(nextBuffer + i + entrySize, buffer + i, entrySize + getKeyCount() * entrySize - i);
+	// entrySize + numKeys * entrySize - i gives entries after insert (ignore initial entry)
+	memcpy(nextBuffer + i + entrySize, buffer + i, entrySize + numKeys * entrySize - i);
 
 	memcpy(buffer, nextBuffer, PageFile::PAGE_SIZE);
 	free(nextBuffer);
@@ -340,7 +339,7 @@ RC BTNonLeafNode::locateChildPtr(int searchKey, PageId& pid)
         // Search algorithm: find the first key greater than the search key and follow it's left pointer
         int* checkKey = buffer + i * indexSize + sizeof(PageId);
         if(*checkKey > searchKey){
-            memcpy(&pid, buffer+i*indexSize, sizeof(PageId));
+            memcpy(&pid, buffer + i * indexSize, sizeof(PageId));
             return 0;
         }
     }
@@ -360,6 +359,7 @@ RC BTNonLeafNode::initializeRoot(PageId pid1, int key, PageId pid2)
 {
     memset(buffer, 0, PageFile::PAGE_SIZE);
     memcpy(buffer, &pid1, sizeof(PageId));
+    // Could use insert, but easy enough to hard code
     memcpy(buffer + sizeof(PageId), &key, sizeof(key));
     memcpy(buffer + sizeof(PageId) + sizeof(int), &pid2, sizeof(PageId));
     numKeys = 1;
