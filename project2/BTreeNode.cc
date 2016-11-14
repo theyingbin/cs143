@@ -43,7 +43,53 @@ int BTLeafNode::getKeyCount()
  * @return 0 if successful. Return an error code if the node is full.
  */
 RC BTLeafNode::insert(int key, const RecordId& rid)
-{ return 0; }
+{ 
+	int entrySize = sizeof(RecordId) + sizeof(int);
+
+	int numEntriesAllowed = (PageFile::PAGE_SIZE - sizeof(PageId)) / entrySize;
+
+	if(getKeyCount() + 1 > numEntriesAllowed) {
+		return RC_NODE_FULL;
+	}
+
+	int i = 0;
+	// We know one more entry can fit so subtract entry size
+	// Go through until key is smaller than key in the buffer
+	while (i < (PageFile::PAGE_SIZE - entrySize)) {
+		int tempKey;
+		memcpy(&tempKey, buffer + i + sizeof(RecordId), sizeof(int));
+
+		if (!tempkey || key <= tempKey)
+			break;
+
+		i += entrySize;
+	}
+
+	// Now we know where to put key, rid into
+	// Copy buffer up until that point
+	char* nextBuffer = (char*) malloc(PageFile::PAGE_SIZE);
+	memset(nextBuffer, 0, PageFile::PAGE_SIZE);
+	memcpy(nextBuffer, buffer, i);
+
+	// Store key and then rid
+	memcpy(nextBuffer + i, &rid, sizeof(RecordId));
+	memcpy(nextBuffer + i + sizeof(RecordId), &key, sizeof(int));
+
+	// After we insert our entry, copy the rest in
+	// getKeyCount() * entrySize - i gives entries after insert
+	memcpy(nextBuffer + i + entrySize, buffer + i, getKeyCount() * entrySize - i);
+
+	// Add in nextNodePtr at the end
+	PageId nextNodePtr = getNextNodePtr();
+	memcpy(nextBuffer + PageFile::PAGE_SIZE - sizeof(PageId), &nextNodePtr, sizeof(PageId));
+
+	memcpy(buffer, nextBuffer, PageFile::PAGE_SIZE);
+	free(nextBuffer);
+
+	numKeys++;	
+
+	return 0; 
+}
 
 /*
  * Insert the (key, rid) pair to the node
@@ -57,7 +103,9 @@ RC BTLeafNode::insert(int key, const RecordId& rid)
  */
 RC BTLeafNode::insertAndSplit(int key, const RecordId& rid, 
                               BTLeafNode& sibling, int& siblingKey)
-{ return 0; }
+{ 
+	return 0; 
+}
 
 /**
  * If searchKey exists in the node, set eid to the index entry
@@ -74,7 +122,7 @@ RC BTLeafNode::locate(int searchKey, int& eid)
 {
     int indexSize = sizeof(RecordId) + sizeof(int);     // gets the size of every pair of RecordId and int
     for(int i=0; i<numKeys; i++){
-        int checkPtr* = (int*)(buffer + i*indexSize);
+        int* checkPtr = (int*)(buffer + i*indexSize);
 
         if(*checkPtr == searchKey){
             eid = i;
@@ -101,11 +149,12 @@ RC BTLeafNode::readEntry(int eid, int& key, RecordId& rid)
 {
     if(eid >= numKeys || eid < 0)
         return RC_NO_SUCH_RECORD;
-    else
-        int indexSize = sizeof(RecordId) + sizeof(int);
-        memcpy(&key, buffer + eid * indexSize + sizeof(RecordId), sizeof(int));
-        memcpy(&rid, buffer + eid * indexSize, sizeof(RecordId));
-        return 0;
+    
+    int indexSize = sizeof(RecordId) + sizeof(int);
+    memcpy(&rid, buffer + eid * indexSize, sizeof(RecordId));
+    memcpy(&key, buffer + eid * indexSize + sizeof(RecordId), sizeof(int));
+    return 0;
+        
 }
 
 /*
@@ -173,7 +222,51 @@ int BTNonLeafNode::getKeyCount()
  * @return 0 if successful. Return an error code if the node is full.
  */
 RC BTNonLeafNode::insert(int key, PageId pid)
-{ return 0; }
+{ 
+	int entrySize = sizeof(int) + sizeof(PageId);
+
+	int numEntriesAllowed = (PageFile::PAGE_SIZE - sizeof(PageId)) / entrySize;
+
+	if(getKeyCount() + 1 > numEntriesAllowed) {
+		return RC_NODE_FULL;
+	}
+
+	// Offset first 8 bytes
+	int i = entrySize;
+
+	// We know one more entry can fit so subtract entry size
+	// Go through until key is smaller than key in the buffer
+	while (i < (PageFile::PAGE_SIZE - entrySize)) {
+		int tempKey;
+		memcpy(&tempKey, buffer + i + sizeof(PageId), sizeof(int));
+
+		if (!tempkey || key <= tempKey)
+			break;
+
+		i += entrySize;
+	}
+
+	// Now we know where to put key, rid into
+	// Copy buffer up until that point
+	char* nextBuffer = (char*) malloc(PageFile::PAGE_SIZE);
+	memset(nextBuffer, 0, PageFile::PAGE_SIZE);
+	memcpy(nextBuffer, buffer, i);
+
+	// Store key and then rid
+	memcpy(nextBuffer + i, &pid, sizeof(PageId));
+	memcpy(nextBuffer + i + sizeof(PageId), &key, sizeof(int));
+
+	// After we insert our entry, copy the rest in
+	// getKeyCount() * entrySize - i gives entries after insert
+	memcpy(nextBuffer + i + entrySize, buffer + i, entrySize + getKeyCount() * entrySize - i);
+
+	memcpy(buffer, nextBuffer, PageFile::PAGE_SIZE);
+	free(nextBuffer);
+
+	numKeys++;
+
+	return 0; 
+}
 
 /*
  * Insert the (key, pid) pair to the node
