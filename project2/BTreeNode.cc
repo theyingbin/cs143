@@ -43,7 +43,7 @@ int BTLeafNode::getKeyCount()
  */
 RC BTLeafNode::insert(int key, const RecordId& rid)
 { 
-	int entrySize = sizeof(int) + sizeof(RecordId);
+	int entrySize = sizeof(RecordId) + sizeof(int);
 
 	int numEntriesAllowed = (PageFile::PAGE_SIZE - sizeof(PageId)) / entrySize;
 
@@ -51,18 +51,16 @@ RC BTLeafNode::insert(int key, const RecordId& rid)
 		return RC_NODE_FULL;
 	}
 
-	char* p = buffer;
 	int i = 0;
 	// We know one more entry can fit so subtract entry size
 	// Go through until key is smaller than key in the buffer
 	while (i < (PageFile::PAGE_SIZE - entrySize)) {
 		int tempKey;
-		memcpy(&tempKey, p, sizeof(int));
+		memcpy(&tempKey, buffer + i + sizeof(RecordId), sizeof(int));
 
-		if (!temp || key <= tempKey)
+		if (!tempkey || key <= tempKey)
 			break;
 
-		temp += entrySize;
 		i += entrySize;
 	}
 
@@ -73,8 +71,8 @@ RC BTLeafNode::insert(int key, const RecordId& rid)
 	memcpy(nextBuffer, buffer, i);
 
 	// Store key and then rid
-	memcpy(nextBuffer + i, &key, sizeof(int));
-	memcpy(nextBuffer + i + sizeof(int), &rid, sizeof(RecordId));
+	memcpy(nextBuffer + i, &rid, sizeof(RecordId));
+	memcpy(nextBuffer + i + sizeof(RecordId), &key, sizeof(int));
 
 	// After we insert our entry, copy the rest in
 	// getKeyCount() * entrySize - i gives entries after insert
@@ -87,7 +85,7 @@ RC BTLeafNode::insert(int key, const RecordId& rid)
 	memcpy(buffer, nextBuffer, PageFile::PAGE_SIZE);
 	free(nextBuffer);
 
-	// INCREASE KEY COUNT HERE
+	numKeys++;	
 
 	return 0; 
 }
@@ -123,7 +121,7 @@ RC BTLeafNode::locate(int searchKey, int& eid)
 {
     int indexSize = sizeof(RecordId) + sizeof(int);     // gets the size of every pair of RecordId and int
     for(int i=0; i<numKeys; i++){
-        int checkPtr* = (int*)(buffer + i*indexSize);
+        int* checkPtr = (int*)(buffer + i*indexSize);
 
         if(*checkPtr == searchKey){
             eid = i;
@@ -150,11 +148,12 @@ RC BTLeafNode::readEntry(int eid, int& key, RecordId& rid)
 {
     if(eid >= numKeys || eid < 0)
         return RC_NO_SUCH_RECORD;
-    else
-        int indexSize = sizeof(RecordId) + sizeof(int);
-        memcpy(&key, buffer + eid * indexSize + sizeof(RecordId), sizeof(int));
-        memcpy(&rid, buffer + eid * indexSize, sizeof(RecordId));
-        return 0;
+    
+    int indexSize = sizeof(RecordId) + sizeof(int);
+    memcpy(&rid, buffer + eid * indexSize, sizeof(RecordId));
+    memcpy(&key, buffer + eid * indexSize + sizeof(RecordId), sizeof(int));
+    return 0;
+        
 }
 
 /*
@@ -165,7 +164,7 @@ PageId BTLeafNode::getNextNodePtr()
 { 
     PageId pid = 0;
     memcpy(&pid, buffer + PageFile::PAGE_SIZE - sizeof(PageId), sizeof(PageId));       // gets the last bits of buffer, where it stores the pointer to the next node
-    return PageId;
+    return pid;
 }
 
 /*
@@ -225,19 +224,17 @@ RC BTNonLeafNode::insert(int key, PageId pid)
 	}
 
 	// Offset first 8 bytes
-	char* p = buffer + entrySize;
 	int i = entrySize;
 
 	// We know one more entry can fit so subtract entry size
 	// Go through until key is smaller than key in the buffer
 	while (i < (PageFile::PAGE_SIZE - entrySize)) {
 		int tempKey;
-		memcpy(&tempKey, p, sizeof(int));
+		memcpy(&tempKey, buffer + i + sizeof(PageId), sizeof(int));
 
-		if (!temp || key <= tempKey)
+		if (!tempkey || key <= tempKey)
 			break;
 
-		temp += entrySize;
 		i += entrySize;
 	}
 
@@ -248,8 +245,8 @@ RC BTNonLeafNode::insert(int key, PageId pid)
 	memcpy(nextBuffer, buffer, i);
 
 	// Store key and then rid
-	memcpy(nextBuffer + i, &key, sizeof(int));
-	memcpy(nextBuffer + i + sizeof(int), &pid, sizeof(PageId));
+	memcpy(nextBuffer + i, &pid, sizeof(PageId));
+	memcpy(nextBuffer + i + sizeof(PageId), &key, sizeof(int));
 
 	// After we insert our entry, copy the rest in
 	// getKeyCount() * entrySize - i gives entries after insert
@@ -258,7 +255,7 @@ RC BTNonLeafNode::insert(int key, PageId pid)
 	memcpy(buffer, nextBuffer, PageFile::PAGE_SIZE);
 	free(nextBuffer);
 
-	// INCREASE KEY COUNT HERE
+	numKeys++;
 
 	return 0; 
 }
