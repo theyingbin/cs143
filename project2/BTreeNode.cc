@@ -2,6 +2,7 @@
 
 using namespace std;
 
+/* Constructor for the BTLeafNode class */
 BTLeafNode::BTreeNode(){
     memset(buffer, 0, PageFile::PAGE_SIZE);
     numKeys = 0;
@@ -115,7 +116,7 @@ PageId BTLeafNode::getNextNodePtr()
 { 
     PageId pid = 0;
     memcpy(&pid, buffer + PageFile::PAGE_SIZE - sizeof(PageId), sizeof(PageId));       // gets the last bits of buffer, where it stores the pointer to the next node
-    return PageId;
+    return pid;
 }
 
 /*
@@ -132,6 +133,13 @@ RC BTLeafNode::setNextNodePtr(PageId pid)
         memcpy(end, &pid, sizeof(PageId));
 }
 
+
+/* Constructor for the BTNonLeafNode class */
+BTNonLeafNode::BTNonLeafNode(){
+    memset(buffer, 0, PageFile::PAGE_SIZE);
+    numKeys = 0;
+}
+
 /*
  * Read the content of the node from the page pid in the PageFile pf.
  * @param pid[IN] the PageId to read
@@ -139,7 +147,7 @@ RC BTLeafNode::setNextNodePtr(PageId pid)
  * @return 0 if successful. Return an error code if there is an error.
  */
 RC BTNonLeafNode::read(PageId pid, const PageFile& pf)
-{ return 0; }
+{ return pf.read(pid, buffer); }
     
 /*
  * Write the content of the node to the page pid in the PageFile pf.
@@ -148,14 +156,14 @@ RC BTNonLeafNode::read(PageId pid, const PageFile& pf)
  * @return 0 if successful. Return an error code if there is an error.
  */
 RC BTNonLeafNode::write(PageId pid, PageFile& pf)
-{ return 0; }
+{ return pf.write(pid, buffer); }
 
 /*
  * Return the number of keys stored in the node.
  * @return the number of keys in the node
  */
 int BTNonLeafNode::getKeyCount()
-{ return 0; }
+{ return numKeys; }
 
 
 /*
@@ -188,7 +196,20 @@ RC BTNonLeafNode::insertAndSplit(int key, PageId pid, BTNonLeafNode& sibling, in
  * @return 0 if successful. Return an error code if there is an error.
  */
 RC BTNonLeafNode::locateChildPtr(int searchKey, PageId& pid)
-{ return 0; }
+{
+    int indexSize = sizeof(PageId) + sizeof(int);
+    for(int i=0; i < numKeys; i++){
+        // Search algorithm: find the first key greater than the search key and follow it's left pointer
+        int* checkKey = buffer + i * indexSize + sizeof(PageId);
+        if(*checkKey > searchKey){
+            memcpy(&pid, buffer+i*indexSize, sizeof(PageId));
+            return 0;
+        }
+    }
+    // if we don't find anything, follow the last key's right pointer
+    memcpy(&pid, buffer+numKeys*indexSize, sizeof(PageId));
+    return 0;
+}
 
 /*
  * Initialize the root node with (pid1, key, pid2).
@@ -198,4 +219,11 @@ RC BTNonLeafNode::locateChildPtr(int searchKey, PageId& pid)
  * @return 0 if successful. Return an error code if there is an error.
  */
 RC BTNonLeafNode::initializeRoot(PageId pid1, int key, PageId pid2)
-{ return 0; }
+{
+    memset(buffer, 0, PageFile::PAGE_SIZE);
+    memcpy(buffer, &pid1, sizeof(PageId));
+    memcpy(buffer + sizeof(PageId), &key, sizeof(key));
+    memcpy(buffer + sizeof(PageId) + sizeof(int), &pid2, sizeof(PageId));
+    numKeys = 1;
+    return 0;
+}

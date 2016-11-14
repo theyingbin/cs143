@@ -19,7 +19,7 @@
 class BTLeafNode {
   public:
 
-    /* Constructor for the BTLeafNode class*/
+   /* Constructor for the BTLeafNode class*/
     BTLeafNode();
 
    /**
@@ -118,6 +118,9 @@ class BTLeafNode {
  */
 class BTNonLeafNode {
   public:
+   /* Constructor for the BTNonLeafNode class*/
+    BTNonLeafNode();
+
    /**
     * Insert a (key, pid) pair to the node.
     * Remember that all keys inside a B+tree node should be kept sorted.
@@ -188,6 +191,8 @@ class BTNonLeafNode {
     * that contains the node.
     */
     char buffer[PageFile::PAGE_SIZE];
+
+    int numKeys; // number of keys in this node
 }; 
 
 #endif /* BTREENODE_H */
