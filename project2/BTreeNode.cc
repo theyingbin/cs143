@@ -323,7 +323,79 @@ RC BTNonLeafNode::insert(int key, PageId pid)
  * @return 0 if successful. Return an error code if there is an error.
  */
 RC BTNonLeafNode::insertAndSplit(int key, PageId pid, BTNonLeafNode& sibling, int& midKey)
-{ return 0; }
+{ 
+	int entrySize = sizeof(PageId) + sizeof(int);
+
+	int numEntriesAllowed = (PageFile::PAGE_SIZE - sizeof(PageId)) / entrySize;
+
+	if (numKeys < numEntriesAllowed)
+		return RC_INVALID_FILE_FORMAT;
+
+	if (sibling.numKeys != 0)
+		return RC_INVALID_ATTRIBUTE;
+
+	memset(sibling.buffer, 0, PageFile::PAGE_SIZE);
+
+	int halfKeys = (numKeys+1) / 2;
+	// Is this right?
+	int halfIndex = halfKeys * entrySize;
+
+	int lastFirstHalf = -1;
+	int firstSecondHalf = -1;
+
+	memcpy(&lastFirstHalf, buffer + halfIndex - sizeof(int), sizeof(int));
+	memcpy(&firstSecondHalf, buffer + halfIndex + sizeof(PageId), sizeof(int));
+
+	if (key < lastFirstHalf) {
+		memcpy(sibling.buffer, buffer + halfIndex, PageFile::PAGE_SIZE - halfIndex);
+		
+		sibling.numKeys = numKeys - halfKeys;
+
+		memcpy(&midKey, buffer + halfIndex - sizeof(int));
+
+		// Need to set sibling pid from buffer?
+
+		memset(buffer + halfIndex, 0, PageFile::PAGE_SIZE - halfIndex);
+		numKeys = halfKeys - 1;
+
+		insert(key, pid);
+
+		// Do we need to insert into parent too?
+
+	} else if (key > firstSecondHalf) {
+		// First pid, key pair is median
+		memcpy(sibling.buffer + entrySize, buffer + halfIndex + entrySize, PageFile::PAGE_SIZE - halfIndex - entrySize);
+		
+		sibling.numKeys = numKeys - halfKeys - 1;
+
+		memcpy(&midKey, buffer + halfIndex + sizeof(PageId));
+
+		// Need to set sibling pid from buffer?
+
+		memset(buffer + halfIndex, 0, PageFile::PAGE_SIZE - halfIndex);
+		numKeys = halfKeys;
+
+		sibling.insert(key, pid);
+
+		// Do we need to insert into parent too?
+
+	} else {
+		memcpy(sibling.buffer, buffer + halfIndex, PageFile::PAGE_SIZE - halfIndex);
+		
+		sibling.numKeys = numKeys - halfKeys;
+
+		midkey = key;
+
+		// Need to set sibling pid from buffer?
+
+		memset(buffer + halfIndex, 0, PageFile::PAGE_SIZE - halfIndex);
+		numKeys = halfKeys;
+
+		// Do we need to insert into parent ?
+	}
+
+	return 0;
+}
 
 /*
  * Given the searchKey, find the child-node pointer to follow and
@@ -359,7 +431,6 @@ RC BTNonLeafNode::initializeRoot(PageId pid1, int key, PageId pid2)
 {
     memset(buffer, 0, PageFile::PAGE_SIZE);
     memcpy(buffer, &pid1, sizeof(PageId));
-    // Could use insert, but easy enough to hard code
     memcpy(buffer + sizeof(PageId), &key, sizeof(key));
     memcpy(buffer + sizeof(PageId) + sizeof(int), &pid2, sizeof(PageId));
     numKeys = 1;
