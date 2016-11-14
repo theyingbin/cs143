@@ -19,7 +19,7 @@
 class BTLeafNode {
   public:
 
-    /* Constructor for the BTLeafNode class*/
+   /* Constructor for the BTLeafNode class*/
     BTLeafNode();
 
    /**
@@ -118,6 +118,9 @@ class BTLeafNode {
  */
 class BTNonLeafNode {
   public:
+   /* Constructor for the BTNonLeafNode class*/
+    BTNonLeafNode();
+
    /**
     * Insert a (key, pid) pair to the node.
     * Remember that all keys inside a B+tree node should be kept sorted.
