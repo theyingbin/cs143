@@ -103,6 +103,41 @@ RC BTLeafNode::insert(int key, const RecordId& rid)
 RC BTLeafNode::insertAndSplit(int key, const RecordId& rid, 
                               BTLeafNode& sibling, int& siblingKey)
 { 
+	int entrySize = sizeof(RecordId) + sizeof(int);
+
+	int numEntriesAllowed = (PageFile::PAGE_SIZE - sizeof(PageId)) / entrySize;
+
+	if (getKeyCount() < numEntriesAllowed)
+		return RC_INVALID_FILE_FORMAT;
+
+	if (sibling.getKeyCount() != 0)
+		return RC_INVALID_ATTRIBUTE;
+
+	memset(sibling.buffer, 0, PageFile::PAGE_SIZE);
+
+	int halfKeys = (getKeyCount()+1) / 2;
+	int halfIndex = halfKeys * entrySize;
+
+	memcpy(sibling.buffer, buffer + halfIndex, PageFile::PAGE_SIZE - sizeof(PageId) - halfIndex);
+
+	sibling.numKeys = getKeyCount() - halfKeys;
+	sibling.setNextNodePtr(getNextNodePtr());
+
+	memset(buffer + halfIndex, 0, PageFile::PAGE_SIZE - sizeof(PageId));
+	numKeys = halfKeys;
+
+	int siblingStartKey;
+	memcpy(&siblingStartKey, sibling.buffer, sizeof(int));
+
+	if (key < siblingStartKey)
+		insert(key, rid);
+	else
+		sibling.insert(key, rid);
+
+	memcpy(&siblingStartKey, sibling.buffer + sizeof(RecordId), sizeof(int));
+
+	// Anything else to do here?
+
 	return 0; 
 }
 
@@ -176,10 +211,22 @@ RC BTLeafNode::setNextNodePtr(PageId pid)
 {
     if(pid < 0)
         return RC_INVALID_PID;
-    else
-        char* end = buffer + PageFile::PAGE_SIZE - sizeof(PageId);
-        memcpy(end, &pid, sizeof(PageId));
+    
+    char* end = buffer + PageFile::PAGE_SIZE - sizeof(PageId);
+    memcpy(end, &pid, sizeof(PageId));
+
+    return 0;
 }
+
+
+
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+
+
 
 /*
  * Read the content of the node from the page pid in the PageFile pf.
