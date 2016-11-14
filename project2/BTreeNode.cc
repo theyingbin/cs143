@@ -2,6 +2,12 @@
 
 using namespace std;
 
+BTLeafNode::BTreeNode(){
+    memset(buffer, 0, PageFile::PAGE_SIZE);
+    numKeys = 0;
+}
+
+
 /*
  * Read the content of the node from the page pid in the PageFile pf.
  * @param pid[IN] the PageId to read
@@ -9,7 +15,7 @@ using namespace std;
  * @return 0 if successful. Return an error code if there is an error.
  */
 RC BTLeafNode::read(PageId pid, const PageFile& pf)
-{ return 0; }
+{ return pf.read(pid, buffer); }
     
 /*
  * Write the content of the node to the page pid in the PageFile pf.
@@ -18,14 +24,16 @@ RC BTLeafNode::read(PageId pid, const PageFile& pf)
  * @return 0 if successful. Return an error code if there is an error.
  */
 RC BTLeafNode::write(PageId pid, PageFile& pf)
-{ return 0; }
+{ return pf.write(pid, buffer); }
 
 /*
  * Return the number of keys stored in the node.
  * @return the number of keys in the node
  */
 int BTLeafNode::getKeyCount()
-{ return 0; }
+{ 
+    return numKeys;
+}
 
 /*
  * Insert a (key, rid) pair to the node.
@@ -112,7 +120,24 @@ RC BTLeafNode::insertAndSplit(int key, const RecordId& rid,
  * @return 0 if searchKey is found. Otherwise return an error code.
  */
 RC BTLeafNode::locate(int searchKey, int& eid)
-{ return 0; }
+{
+    int indexSize = sizeof(RecordId) + sizeof(int);     // gets the size of every pair of RecordId and int
+    for(int i=0; i<numKeys; i++){
+        int checkPtr* = (int*)(buffer + i*indexSize);
+
+        if(*checkPtr == searchKey){
+            eid = i;
+            return 0;
+        }
+        else if(*checkPtr > searchKey){
+            eid = i;
+            return RC_NO_SUCH_RECORD;
+        }
+    }
+
+    eid = numKeys;
+    return RC_NO_SUCH_RECORD;
+}
 
 /*
  * Read the (key, rid) pair from the eid entry.
@@ -122,14 +147,26 @@ RC BTLeafNode::locate(int searchKey, int& eid)
  * @return 0 if successful. Return an error code if there is an error.
  */
 RC BTLeafNode::readEntry(int eid, int& key, RecordId& rid)
-{ return 0; }
+{
+    if(eid >= numKeys || eid < 0)
+        return RC_NO_SUCH_RECORD;
+    else
+        int indexSize = sizeof(RecordId) + sizeof(int);
+        memcpy(&key, buffer + eid * indexSize + sizeof(RecordId), sizeof(int));
+        memcpy(&rid, buffer + eid * indexSize, sizeof(RecordId));
+        return 0;
+}
 
 /*
  * Return the pid of the next slibling node.
  * @return the PageId of the next sibling node 
  */
 PageId BTLeafNode::getNextNodePtr()
-{ return 0; }
+{ 
+    PageId pid = 0;
+    memcpy(&pid, buffer + PageFile::PAGE_SIZE - sizeof(PageId), sizeof(PageId));       // gets the last bits of buffer, where it stores the pointer to the next node
+    return PageId;
+}
 
 /*
  * Set the pid of the next slibling node.
@@ -137,7 +174,13 @@ PageId BTLeafNode::getNextNodePtr()
  * @return 0 if successful. Return an error code if there is an error.
  */
 RC BTLeafNode::setNextNodePtr(PageId pid)
-{ return 0; }
+{
+    if(pid < 0)
+        return RC_INVALID_PID;
+    else
+        char* end = buffer + PageFile::PAGE_SIZE - sizeof(PageId);
+        memcpy(end, &pid, sizeof(PageId));
+}
 
 /*
  * Read the content of the node from the page pid in the PageFile pf.
