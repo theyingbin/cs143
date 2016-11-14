@@ -124,18 +124,18 @@ RC BTLeafNode::insertAndSplit(int key, const RecordId& rid,
 	sibling.numKeys = numKeys - halfKeys;
 	sibling.setNextNodePtr(getNextNodePtr());
 
-	memset(buffer + halfIndex, 0, PageFile::PAGE_SIZE - sizeof(PageId));
+	memset(buffer + halfIndex, 0, PageFile::PAGE_SIZE - sizeof(PageId) - halfIndex);
 	numKeys = halfKeys;
 
 	int siblingStartKey;
-	memcpy(&siblingStartKey, sibling.buffer, sizeof(int));
+	memcpy(&siblingStartKey, sibling.buffer + sizeof(RecordId), sizeof(int));
 
 	if (key < siblingStartKey)
 		insert(key, rid);
 	else
 		sibling.insert(key, rid);
 
-	memcpy(&siblingStartKey, sibling.buffer + sizeof(RecordId), sizeof(int));
+	memcpy(&siblingKey, sibling.buffer + sizeof(RecordId), sizeof(int));
 
 	// Anything else to do here?
 
@@ -188,8 +188,7 @@ RC BTLeafNode::readEntry(int eid, int& key, RecordId& rid)
     int indexSize = sizeof(RecordId) + sizeof(int);
     memcpy(&rid, buffer + eid * indexSize, sizeof(RecordId));
     memcpy(&key, buffer + eid * indexSize + sizeof(RecordId), sizeof(int));
-    return 0;
-        
+    return 0;       
 }
 
 /*
@@ -301,8 +300,8 @@ RC BTNonLeafNode::insert(int key, PageId pid)
 	memcpy(nextBuffer + i + sizeof(PageId), &key, sizeof(int));
 
 	// After we insert our entry, copy the rest in
-	// entrySize + numKeys * entrySize - i gives entries after insert (ignore initial entry)
-	memcpy(nextBuffer + i + entrySize, buffer + i, entrySize + numKeys * entrySize - i);
+	// sizeof(PageId) + numKeys * entrySize - i gives entries after insert (ignore initial entry)
+	memcpy(nextBuffer + i + entrySize, buffer + i, sizeof(PageId) + numKeys * entrySize - i);
 
 	memcpy(buffer, nextBuffer, PageFile::PAGE_SIZE);
 	free(nextBuffer);
