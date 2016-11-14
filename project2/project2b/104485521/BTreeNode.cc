@@ -1,7 +1,4 @@
 #include "BTreeNode.h"
-#include <iostream>
-#include <string.h>
-#include <stdio.h>
 
 using namespace std;
 
@@ -411,7 +408,7 @@ RC BTNonLeafNode::locateChildPtr(int searchKey, PageId& pid)
     int indexSize = sizeof(PageId) + sizeof(int);
     for(int i=0; i < numKeys; i++){
         // Search algorithm: find the first key greater than the search key and follow it's left pointer
-        int* checkKey = (int*)(buffer + i * indexSize + sizeof(PageId));
+        int* checkKey = buffer + i * indexSize + sizeof(PageId);
         if(*checkKey > searchKey){
             memcpy(&pid, buffer + i * indexSize, sizeof(PageId));
             return 0;
