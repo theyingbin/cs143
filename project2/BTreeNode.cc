@@ -102,8 +102,8 @@ RC BTLeafNode::readEntry(int eid, int& key, RecordId& rid)
         return RC_NO_SUCH_RECORD;
     else
         int indexSize = sizeof(RecordId) + sizeof(int);
-        key = buffer + eid * indexSize + sizeof(RecordId);
-        rid = buffer + eid * indexSize;
+        memcpy(&key, buffer + eid * indexSize + sizeof(RecordId), sizeof(int));
+        memcpy(&rid, buffer + eid * indexSize, sizeof(RecordId));
         return 0;
 }
 
