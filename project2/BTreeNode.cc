@@ -1,7 +1,7 @@
 #include "BTreeNode.h"
 #include <iostream>
-#include <string.h>
-#include <stdio.h>
+#include <cstring>
+#include <cstdlib>
 
 using namespace std;
 

@@ -1,9 +1,12 @@
 #include "BTreeNode.h"
+#include <iostream>
+#include <cstring>
+#include <cstdlib>
 
 using namespace std;
 
 /* Constructor for the BTLeafNode class */
-BTLeafNode::BTreeNode(){
+BTLeafNode::BTLeafNode(){
     memset(buffer, 0, PageFile::PAGE_SIZE);
     numKeys = 0;
 }
@@ -59,7 +62,7 @@ RC BTLeafNode::insert(int key, const RecordId& rid)
 		int tempKey;
 		memcpy(&tempKey, buffer + i + sizeof(RecordId), sizeof(int));
 
-		if (!tempkey || key <= tempKey)
+		if (!tempKey || key <= tempKey)
 			break;
 
 		i += entrySize;
@@ -283,7 +286,7 @@ RC BTNonLeafNode::insert(int key, PageId pid)
 		int tempKey;
 		memcpy(&tempKey, buffer + i + sizeof(PageId), sizeof(int));
 
-		if (!tempkey || key <= tempKey)
+		if (!tempKey || key <= tempKey)
 			break;
 
 		i += entrySize;
@@ -350,7 +353,7 @@ RC BTNonLeafNode::insertAndSplit(int key, PageId pid, BTNonLeafNode& sibling, in
 		
 		sibling.numKeys = numKeys - halfKeys;
 
-		memcpy(&midKey, buffer + halfIndex - sizeof(int));
+		memcpy(&midKey, buffer + halfIndex - sizeof(int), sizeof(int));
 
 		// Need to set sibling pid from buffer?
 
@@ -367,7 +370,7 @@ RC BTNonLeafNode::insertAndSplit(int key, PageId pid, BTNonLeafNode& sibling, in
 		
 		sibling.numKeys = numKeys - halfKeys - 1;
 
-		memcpy(&midKey, buffer + halfIndex + sizeof(PageId));
+		memcpy(&midKey, buffer + halfIndex + sizeof(PageId), sizeof(PageId));
 
 		// Need to set sibling pid from buffer?
 
@@ -408,7 +411,7 @@ RC BTNonLeafNode::locateChildPtr(int searchKey, PageId& pid)
     int indexSize = sizeof(PageId) + sizeof(int);
     for(int i=0; i < numKeys; i++){
         // Search algorithm: find the first key greater than the search key and follow it's left pointer
-        int* checkKey = buffer + i * indexSize + sizeof(PageId);
+        int* checkKey = (int*)(buffer + i * indexSize + sizeof(PageId));
         if(*checkKey > searchKey){
             memcpy(&pid, buffer + i * indexSize, sizeof(PageId));
             return 0;
