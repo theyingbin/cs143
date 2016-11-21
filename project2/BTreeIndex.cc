@@ -35,43 +35,15 @@ RC BTreeIndex::open(const string& indexname, char mode)
 {
     RC errorCode = pf.open(indexname, mode);
     
-    if (errorCode != 0)
+    if (errorCode)
         return errorCode;
-
-    /*
-
-    I don't think this section is needed
-
-    // Check that indexname is opened for the first time
-    // Do we even need this?
-    if (pf.endPid() == 0) {
-        rootPid = -1;
-        treeHeight = 0;
-
-        // check that it is opened for writing if first time
-        // I don't think this is needed...
-        // 
-        // errorCode = pf.write(0, buffer);
-        // if(errorCode != 0)
-        //  return errorCode;
-
-        return 0;
-    }
-
-    */
-
-
-    // Does it make sense to store rootPid and treeHeight in the 0th Disk Page?
 
     errorCode = pf.read(0, buffer);
 
-    if (errorCode != 0)
+    if (errorCode)
         return errorCode;
 
-    // Is this use of temps to validate the values necessary?
-    // I feel like if we store this info on the 0th disk page, then there could be garbage there on initial open
-    // So maybe handle that up at the pf.endPid() == 0 check?
-
+    // Use temp values to ensure we get valid values
     PageId tempRootPid;
     int tempTreeHeight;
 
@@ -82,9 +54,10 @@ RC BTreeIndex::open(const string& indexname, char mode)
     if (tempRootPid > 0 && tempTreeHeight >= 0) {
         rootPid = tempRootPid;
         treeHeight = tempTreeHeight;
+        return 0;
     }
-
-    return 0;
+    
+    return RC_FILE_OPEN_FAILED;
 }
 
 /*
@@ -98,7 +71,7 @@ RC BTreeIndex::close()
 
     RC errorCode = pf.write(0, buffer);
 
-    if (errorCode != 0)
+    if (errorCode)
         return errorCode;
 
     return pf.close();
@@ -205,7 +178,7 @@ RC BTreeIndex::insertHelper(int key, const RecordId& rid, int height, PageId cur
 
         ret = insertHelper(key, rid, height+1, childPid, insertedKey, insertedPid);
         if(insertedKey != 0 && insertedPid != 0){
-            // a split happened so we need to modify out current node
+            // a split happened so we need to modify our current node
             ret = node.insert(insertedKey, insertedPid);
             if(ret == 0){
                 node.write(curPid, pf);
@@ -274,12 +247,12 @@ RC BTreeIndex::locate(int searchKey, IndexCursor& cursor)
     while (height != treeHeight) {
         // Get the non leaf node content
         errorCode = nonLeafNode.read(pid, pf);
-        if (errorCode != 0)
+        if (errorCode)
             return errorCode;
 
         // Get the child pointer we want to follow
         errorCode = nonLeafNode.locateChildPtr(searchKey, pid);
-        if (errorCode != 0)
+        if (errorCode)
             return errorCode;
 
         height++;
@@ -323,12 +296,12 @@ RC BTreeIndex::readForward(IndexCursor& cursor, int& key, RecordId& rid)
     BTLeafNode leafNode;
     // Get leaf node content
     errorCode = leafNode.read(cursorPid, pf);
-    if (errorCode != 0) 
+    if (errorCode) 
         return errorCode;
 
     // Get entry info
     errorCode = leafNode.readEntry(cursorEid, key, rid);
-    if (errorCode != 0) 
+    if (errorCode) 
         return errorCode;
 
     // Make sure to account for overflow
