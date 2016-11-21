@@ -9,6 +9,8 @@
  
 #include "BTreeIndex.h"
 #include "BTreeNode.h"
+#include <cstdlib>
+ #include <cstring>
 
 using namespace std;
 
@@ -216,7 +218,7 @@ RC BTreeIndex::insertHelper(int key, const RecordId& rid, int height, PageId cur
 
             node.insertAndSplit(insertedKey, insertedPid, sibling, sibKey);
 
-            sibPid = pf.endPid();
+            PageId sibPid = pf.endPid();
             tempPid = sibPid;
             tempKey = sibKey;
 
