@@ -69,7 +69,8 @@ RC SqlEngine::select(int attr, const string& table, const vector<SelCond>& cond)
   bool atLeastOneCondition = false;
 
 
-  for (SelCond selCond : cond) {
+  for (int i = 0; i < cond.size(); i++) {
+    SelCond selCond = cond[i];
     condValue = atoi(selCond.value);
 
     if (selCond.attr == 1 && selCond.comp != SelCond::NE) {
@@ -216,39 +217,39 @@ RC SqlEngine::select(int attr, const string& table, const vector<SelCond>& cond)
           cout << "Error occured when reading a tuple in table " << table << endl;
           break;
         }
-        for(SelCond selCond : cond){
-          diff = key - atoi(selCond.value);
+        for(int i = 0; i < cond.size(); i++){
+          SelCond selCond = cond[i];
           if(selCond.comp == SelCond::EQ){
-            if(key != selCond.value){
+            if(key != atoi(selCond.value)){
               // breaks out of while loop since the conditionss are no longer true
               break;
             }
           }
           if(selCond.comp == SelCond::NE){
             // is this case right? I don't think it is
-            if(key == selCond.value){
+            if(key == atoi(selCond.value)){
               // move on to the next thing the cursor points to
               continue;
             }
           }
           if(selCond.comp == SelCond::GE){
-            if(key < selCond.value){
+            if(key < atoi(selCond.value)){
               continue;
             }
           }
           if(selCond.comp == SelCond::GT){
-            if(key <= selCond.value){
+            if(key <= atoi(selCond.value)){
               continue;
             }
           }
           if(selCond.comp == SelCond::LE){
-            if(key > selCond.value){
+            if(key > atoi(selCond.value)){
               // no point in searching the other tuples since the next ones will only be larger
               break;
             }
           }
           if(selCond.comp == SelCond::LT){
-            if(key >= selCond.value){
+            if(key >= atoi(selCond.value)){
               // no point in searching the other tuples since the next ones will only be larger
               break;
             }
