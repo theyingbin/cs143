@@ -52,6 +52,10 @@ RC SqlEngine::select(int attr, const string& table, const vector<SelCond>& cond)
     return rc;
   }
 
+  string valueMin = "";
+  string valueMax = "";
+  bool usesValue = false;
+  string valToEqual;
 
   int condValue;
   int keyValueToEqual = INT_MAX;
@@ -73,7 +77,8 @@ RC SqlEngine::select(int attr, const string& table, const vector<SelCond>& cond)
       if (selCond.comp == SelCond::EQ) {
         keyValueToEqual = condValue;
         // If equality on key, always use that to search (aka nothing else matters)
-        break;
+        // actually, it does matter if the where clause selects on a key and a value
+        // break;
 
       } else if (selCond.comp == SelCond::LT) {
         if (maxValueInRange == INT_MIN || condValue <= maxValueInRange)
@@ -92,12 +97,18 @@ RC SqlEngine::select(int attr, const string& table, const vector<SelCond>& cond)
           minValueInRange = condValue; 
       }
     }
+    else if(selCond.attr == 2){
+      usesValue = true;
+      // implement this part later
+
+    }
   }
 
 
   // Valid range for keys does not exist, so don't even try
   if (!(maxValueInRange != INT_MIN && minValueInRange != INT_MAX && maxValueInRange < minValueInRange)) {
 
+    // add usesValue case here where we do a brute force search
     if (btIndex.open(table + ".idx", 'r') != 0 || (!atLeastOneCondition && attr != 4)) {
       // scan the table file from the beginning
       rid.pid = rid.sid = 0;
@@ -166,8 +177,9 @@ RC SqlEngine::select(int attr, const string& table, const vector<SelCond>& cond)
         next_tuple:
         ++rid;
       }
-    } else {
-      // Use index case
+    } 
+    else {
+      // Use index case. This should never occur when have some equality statement on value. Only works for key
       openedIndex = true;
       count = 0;
 
@@ -186,25 +198,78 @@ RC SqlEngine::select(int attr, const string& table, const vector<SelCond>& cond)
       The indexCursor is already at the correct beginning position
       The count++ ... switch(attr) ... stuff should come after the while loop
       */
-    
 
-
-
-      // the condition is met for the tuple. 
-      // increase matching tuple counter
-      count++;
-
-      // print the tuple 
-      switch (attr) {
-      case 1:  // SELECT key
-        fprintf(stdout, "%d\n", key);
-        break;
-      case 2:  // SELECT value
-        fprintf(stdout, "%s\n", value.c_str());
-        break;
-      case 3:  // SELECT *
-        fprintf(stdout, "%d '%s'\n", key, value.c_str());
-        break;
+      while(btIndex.readForward(indexCursor, key, rid) == 0){
+        if(attr == 4){
+          if(keyValueToEqual != INT_MAX && key != keyValueToEqual){
+            // breaks out of while loop since the conditionss are no longer true
+            break;
+          }
+          if(maxValueInRange != INT_MIN && key > maxValueInRange){
+            break;
+          }
+          if(minValueInRange != INT_MAX && key < minValueInRange){
+            break;
+          }
+        }
+        if((rc = rf.read(rid, key, value)) < 0){
+          cout << "Error occured when reading a tuple in table " << table << endl;
+          break;
+        }
+        for(SelCond selCond : cond){
+          diff = key - atoi(selCond.value);
+          if(selCond.comp == SelCond::EQ){
+            if(key != selCond.value){
+              // breaks out of while loop since the conditionss are no longer true
+              break;
+            }
+          }
+          if(selCond.comp == SelCond::NE){
+            // is this case right? I don't think it is
+            if(key == selCond.value){
+              // move on to the next thing the cursor points to
+              continue;
+            }
+          }
+          if(selCond.comp == SelCond::GE){
+            if(key < selCond.value){
+              continue;
+            }
+          }
+          if(selCond.comp == SelCond::GT){
+            if(key <= selCond.value){
+              continue;
+            }
+          }
+          if(selCond.comp == SelCond::LE){
+            if(key > selCond.value){
+              // no point in searching the other tuples since the next ones will only be larger
+              break;
+            }
+          }
+          if(selCond.comp == SelCond::LT){
+            if(key >= selCond.value){
+              // no point in searching the other tuples since the next ones will only be larger
+              break;
+            }
+          }
+        }
+        // the condition is met for the tuple. 
+        // increase matching tuple counter
+        count++;
+   
+        // print the tuple 
+        switch (attr) {
+        case 1:  // SELECT key
+          cout << key << endl;
+          break;
+        case 2:  // SELECT value
+          cout << value << endl;
+          break;
+        case 3:  // SELECT *
+          cout << key << " '" << value << "'" << endl;
+          break;
+        }
       }
     }
   }
@@ -212,10 +277,10 @@ RC SqlEngine::select(int attr, const string& table, const vector<SelCond>& cond)
 
 
   // This stuff should happen no matter what
-
+  // break statement will land you here
   // print matching tuple count if "select count(*)"
   if (attr == 4) {
-    fprintf(stdout, "%d\n", count);
+    cout << count << endl;
   }
   rc = 0;
 
