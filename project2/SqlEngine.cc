@@ -79,7 +79,7 @@ RC SqlEngine::select(int attr, const string& table, const vector<SelCond>& cond)
       if (selCond.comp == SelCond::EQ) {
         keyToEqual = condValue;
         maxKeyInRange = min(condValue, maxKeyInRange);
-        minKeyInRange = max(condValue, minKeyInRange)
+        minKeyInRange = max(condValue, minKeyInRange);
 
       } else if (selCond.comp == SelCond::LT) {
         if (maxKeyInRange == INT_MIN || condValue <= maxKeyInRange)
