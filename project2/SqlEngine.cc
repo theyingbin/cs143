@@ -15,6 +15,7 @@
 #include <fstream>
 #include "Bruinbase.h"
 #include "SqlEngine.h"
+#include "BTreeIndex.h"
 
 using namespace std;
 
@@ -48,7 +49,7 @@ RC SqlEngine::select(int attr, const string& table, const vector<SelCond>& cond)
 
   // open the table file
   if ((rc = rf.open(table + ".tbl", 'r')) < 0) {
-    fprintf(stderr, "Error: table %s does not exist\n", table.c_str());
+    fprintf(stderr, "Error - Table %s doesn't exist\n", table.c_str());
     return rc;
   }
 
@@ -58,10 +59,10 @@ RC SqlEngine::select(int attr, const string& table, const vector<SelCond>& cond)
   string valToEqual;
 
   int condValue;
-  int keyValueToEqual = INT_MAX;
-  // minValueInRange and maxValueInRange are inclusive. If their value is 42, then 42 is a valid option for the search  
-  int minValueInRange = INT_MAX;
-  int maxValueInRange = INT_MIN;
+  int keyToEqual = INT_MAX;
+  // minKeyInRange and maxKeyInRange are inclusive. If their value is 42, then 42 is a valid option for the search  
+  int minKeyInRange = INT_MAX;
+  int maxKeyInRange = INT_MIN;
   BTreeIndex btIndex;
   IndexCursor indexCursor;
   bool openedIndex = false;
@@ -75,26 +76,25 @@ RC SqlEngine::select(int attr, const string& table, const vector<SelCond>& cond)
       // Key
       atLeastOneCondition = true;
       if (selCond.comp == SelCond::EQ) {
-        keyValueToEqual = condValue;
-        // If equality on key, always use that to search (aka nothing else matters)
-        // actually, it does matter if the where clause selects on a key and a value
-        // break;
+        keyToEqual = condValue;
+        maxKeyInRange = min(condValue, maxKeyInRange);
+        minKeyInRange = max(condValue, minKeyInRange)
 
       } else if (selCond.comp == SelCond::LT) {
-        if (maxValueInRange == INT_MIN || condValue <= maxValueInRange)
-          maxValueInRange = condValue - 1;
+        if (maxKeyInRange == INT_MIN || condValue <= maxKeyInRange)
+          maxKeyInRange = condValue - 1;
 
       } else if (selCond.comp == SelCond::LE) {
-        if (maxValueInRange == INT_MIN || condValue <= maxValueInRange)
-          maxValueInRange = condValue;
+        if (maxKeyInRange == INT_MIN || condValue <= maxKeyInRange)
+          maxKeyInRange = condValue;
         
       } else if (selCond.comp == SelCond::GT) {
-        if (minValueInRange == INT_MAX || condValue >= minValueInRange)
-          minValueInRange = condValue + 1;
+        if (minKeyInRange == INT_MAX || condValue >= minKeyInRange)
+          minKeyInRange = condValue + 1;
         
       } else if (selCond.comp == SelCond::GE) {
-        if (minValueInRange == INT_MAX || condValue >= minValueInRange)
-          minValueInRange = condValue; 
+        if (minKeyInRange == INT_MAX || condValue >= minKeyInRange)
+          minKeyInRange = condValue; 
       }
     }
     else if(selCond.attr == 2){
@@ -106,7 +106,7 @@ RC SqlEngine::select(int attr, const string& table, const vector<SelCond>& cond)
 
 
   // Valid range for keys does not exist, so don't even try
-  if (!(maxValueInRange != INT_MIN && minValueInRange != INT_MAX && maxValueInRange < minValueInRange)) {
+  if (!(maxKeyInRange != INT_MIN && minKeyInRange != INT_MAX && maxKeyInRange < minKeyInRange)) {
 
     // add usesValue case here where we do a brute force search
     if (btIndex.open(table + ".idx", 'r') != 0 || (!atLeastOneCondition && attr != 4)) {
@@ -135,22 +135,22 @@ RC SqlEngine::select(int attr, const string& table, const vector<SelCond>& cond)
           // skip the tuple if any condition is not met
           switch (cond[i].comp) {
             case SelCond::EQ:
-              if (diff != 0) goto next_tuple;
+              if (diff != 0) goto next;
               break;
             case SelCond::NE:
-              if (diff == 0) goto next_tuple;
+              if (diff == 0) goto next;
               break;
             case SelCond::GT:
-              if (diff <= 0) goto next_tuple;
+              if (diff <= 0) goto next;
               break;
             case SelCond::LT:
-              if (diff >= 0) goto next_tuple;
+              if (diff >= 0) goto next;
               break;
             case SelCond::GE:
-              if (diff < 0) goto next_tuple;
+              if (diff < 0) goto next;
               break;
             case SelCond::LE:
-              if (diff > 0) goto next_tuple;
+              if (diff > 0) goto next;
               break;
           }
 
@@ -174,7 +174,7 @@ RC SqlEngine::select(int attr, const string& table, const vector<SelCond>& cond)
         }
 
         // move to the next tuple
-        next_tuple:
+        next:
         ++rid;
       }
     } 
@@ -183,10 +183,10 @@ RC SqlEngine::select(int attr, const string& table, const vector<SelCond>& cond)
       openedIndex = true;
       count = 0;
 
-      if (keyValueToEqual != INT_MAX)
-        btIndex.locate(keyValueToEqual, indexCursor);
-      else if (minValueInRange != INT_MAX)
-        btIndex.locate(minValueInRange, indexCursor);
+      if (keyToEqual != INT_MAX)
+        btIndex.locate(keyToEqual, indexCursor);
+      else if (minKeyInRange != INT_MAX)
+        btIndex.locate(minKeyInRange, indexCursor);
       else
         btIndex.locate(0, indexCursor);
 
@@ -201,14 +201,14 @@ RC SqlEngine::select(int attr, const string& table, const vector<SelCond>& cond)
 
       while(btIndex.readForward(indexCursor, key, rid) == 0){
         if(attr == 4){
-          if(keyValueToEqual != INT_MAX && key != keyValueToEqual){
+          if(keyToEqual != INT_MAX && key != keyToEqual){
             // breaks out of while loop since the conditionss are no longer true
             break;
           }
-          if(maxValueInRange != INT_MIN && key > maxValueInRange){
+          if(maxKeyInRange != INT_MIN && key > maxKeyInRange){
             break;
           }
-          if(minValueInRange != INT_MAX && key < minValueInRange){
+          if(minKeyInRange != INT_MAX && key < minKeyInRange){
             break;
           }
         }
