@@ -85,6 +85,11 @@ class BTLeafNode {
     * @return the number of keys in the node
     */
     int getKeyCount();
+
+   /**
+    * Set the number of keys stored in the node.
+    */
+    void setKeyCount(int keys);
  
    /**
     * Read the content of the node from the page pid in the PageFile pf.
@@ -168,6 +173,11 @@ class BTNonLeafNode {
     * @return the number of keys in the node
     */
     int getKeyCount();
+
+   /**
+    * Set the number of keys stored in the node.
+    */
+    void setKeyCount(int keys);
 
    /**
     * Read the content of the node from the page pid in the PageFile pf.
