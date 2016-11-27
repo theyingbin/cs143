@@ -109,8 +109,7 @@ RC SqlEngine::select(int attr, const string& table, const vector<SelCond>& cond)
   // Valid range for keys does not exist, so don't even try
   if (!(maxValueInRange != INT_MIN && minValueInRange != INT_MAX && maxValueInRange < minValueInRange)) {
 
-    // add usesValue case here where we do a brute force search
-    if (btIndex.open(table + ".idx", 'r') != 0 || (!atLeastOneCondition && attr != 4)) {
+    if (btIndex.open(table + ".idx", 'r') != 0 || !atLeastOneCondition || usesValue) {
       // scan the table file from the beginning
       rid.pid = rid.sid = 0;
       count = 0;
@@ -190,15 +189,6 @@ RC SqlEngine::select(int attr, const string& table, const vector<SelCond>& cond)
         btIndex.locate(minValueInRange, indexCursor);
       else
         btIndex.locate(0, indexCursor);
-
-
-
-      /*
-      ----------------IMPLEMENT THIS PART----------------
-      Goal is to basically get all the tuples that match the conditions
-      The indexCursor is already at the correct beginning position
-      The count++ ... switch(attr) ... stuff should come after the while loop
-      */
 
       while(btIndex.readForward(indexCursor, key, rid) == 0){
         if(attr == 4){
