@@ -100,8 +100,8 @@ RC BTreeIndex::insert(int key, const RecordId& rid)
         return node.write(rootPid, pf);
     }
     else{
-        int insertedKey = 0;
-        PageId insertedPid = 0;
+        int insertedKey = INT_MAX;
+        PageId insertedPid = INT_MAX;
 
         return insertHelper(key, rid, 1, rootPid, insertedKey, insertedPid);
     }
@@ -111,8 +111,8 @@ RC BTreeIndex::insert(int key, const RecordId& rid)
 RC BTreeIndex::insertHelper(int key, const RecordId& rid, int height, PageId curPid, int& tempKey, PageId& tempPid){
     RC ret;
 
-    tempKey = 0;
-    tempPid = 0;
+    tempKey = INT_MAX;
+    tempPid = INT_MAX;
 
     // We are at the leaf level
     if(height == treeHeight){
@@ -171,7 +171,7 @@ RC BTreeIndex::insertHelper(int key, const RecordId& rid, int height, PageId cur
         node.locateChildPtr(key, childPid);
 
         ret = insertHelper(key, rid, height+1, childPid, tempKey, tempPid);
-        if(tempKey != 0 && tempPid != 0){
+        if(tempKey != INT_MAX && tempPid != INT_MAX){
             // a split happened so we need to modify our current node
             ret = node.insert(tempKey, tempPid);
             if(ret == 0){
