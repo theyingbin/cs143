@@ -138,24 +138,21 @@ RC BTreeIndex::insertHelper(int key, const RecordId& rid, int height, PageId cur
             tempPid = pf.endPid();
             tempKey = siblingKey;
 
-            PageId sibPid = tempPid;
-            int sibKey = tempKey;
-
             sibling.setNextNodePtr(curLeaf.getNextNodePtr());
-            curLeaf.setNextNodePtr(sibPid);
+            curLeaf.setNextNodePtr(tempPid);
 
             // set changes
             ret = curLeaf.write(curPid, pf);
             if(ret)
                 return ret;        
-            ret = sibling.write(sibPid, pf);
+            ret = sibling.write(tempPid, pf);
             if(ret)
                 return ret;
 
             // check for the case in which the insertion requires a new root
             if(treeHeight == 1){
                 BTNonLeafNode root;
-                root.initializeRoot(curPid, sibKey, sibPid);
+                root.initializeRoot(curPid, tempKey, tempPid);
                 treeHeight++;
 
                 rootPid = pf.endPid();
@@ -170,16 +167,13 @@ RC BTreeIndex::insertHelper(int key, const RecordId& rid, int height, PageId cur
         BTNonLeafNode node;
         node.read(curPid, pf);
 
-        PageId childPid = 0;
+        PageId childPid;
         node.locateChildPtr(key, childPid);
 
-        int insertedKey = 0;
-        PageId insertedPid = 0;
-
-        ret = insertHelper(key, rid, height+1, childPid, insertedKey, insertedPid);
-        if(insertedKey != 0 && insertedPid != 0){
+        ret = insertHelper(key, rid, height+1, childPid, tempKey, tempPid);
+        if(tempKey != 0 && insertedPid != 0){
             // a split happened so we need to modify our current node
-            ret = node.insert(insertedKey, insertedPid);
+            ret = node.insert(tempKey, tempPid);
             if(ret == 0){
                 node.write(curPid, pf);
                 return 0;
@@ -189,7 +183,7 @@ RC BTreeIndex::insertHelper(int key, const RecordId& rid, int height, PageId cur
             BTNonLeafNode sibling;
             int sibKey;
 
-            node.insertAndSplit(insertedKey, insertedPid, sibling, sibKey);
+            node.insertAndSplit(tempKey, tempPid, sibling, sibKey);
 
             PageId sibPid = pf.endPid();
             tempPid = sibPid;
