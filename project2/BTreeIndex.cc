@@ -92,7 +92,7 @@ RC BTreeIndex::close()
  */
 RC BTreeIndex::insert(int key, const RecordId& rid)
 {
-    fprintf(stdout, "key = %d\n", key);
+    //fprintf(stdout, "key = %d\n", key);
     RC error;
     if(key < 0)
             return RC_INVALID_ATTRIBUTE;
@@ -117,7 +117,7 @@ RC BTreeIndex::insert(int key, const RecordId& rid)
 }
 
 RC BTreeIndex::insertHelper(int key, const RecordId& rid, int height, PageId curPid, int& insertedKey, PageId& insertedPid){
-    fprintf(stdout, "key = %d, height = %d, curPid = %d, insertedKey = %d, insertedPid = %d\n", key, height, curPid, insertedKey, insertedPid);
+    //fprintf(stdout, "key = %d, height = %d, curPid = %d, insertedKey = %d, insertedPid = %d\n", key, height, curPid, insertedKey, insertedPid);
     RC ret;
 
     insertedKey = -1;
@@ -271,10 +271,14 @@ RC BTreeIndex::locate(int searchKey, IndexCursor& cursor)
     // And eid is set correctly to just after largest element that is smaller (aka right place)
     // so just assign and return either way
     errorCode = leafNode.locate(searchKey, eid);
-    cursor.pid = pid;
-    cursor.eid = eid;
+    if (errorCode && eid == leafNode.getKeyCount())
+        cursor.pid = leafNode.getNextNodePtr();
+    else {
+        cursor.pid = pid;
+        cursor.eid = eid;
+    }
 
-    return errorCode;
+    return 0;
 }
 
 /*
@@ -289,34 +293,28 @@ RC BTreeIndex::readForward(IndexCursor& cursor, int& key, RecordId& rid)
 {
     RC errorCode;
 
-    PageId cursorPid = cursor.pid;
-    int cursorEid = cursor.eid;
-
     // 0 not allowed bc store rootPid and treeHeight there
-    if(cursorPid <= 0 || cursorEid < 0)
+    if(cursor.pid <= 0 || cursor.eid < 0)
         return RC_INVALID_CURSOR;
 
     BTLeafNode leafNode;
     // Get leaf node content
-    errorCode = leafNode.read(cursorPid, pf);
+    errorCode = leafNode.read(cursor.pid, pf);
     if (errorCode) 
         return errorCode;
 
     // Get entry info
-    errorCode = leafNode.readEntry(cursorEid, key, rid);
+    errorCode = leafNode.readEntry(cursor.eid, key, rid);
     if (errorCode) 
         return errorCode;
 
     // Make sure to account for overflow
-    if (cursorEid + 1 >= leafNode.getKeyCount()) {
-        cursorEid = 0;
-        cursorPid = leafNode.getNextNodePtr();
+    if (cursor.eid + 1 >= leafNode.getKeyCount()) {
+        cursor.eid = 0;
+        cursor.pid = leafNode.getNextNodePtr();
     } else {
-        cursorEid++;
+        cursor.eid++;
     }
-
-    cursor.eid = cursorEid;
-    cursor.pid = cursorPid;
 
     return 0;
 }
