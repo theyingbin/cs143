@@ -213,7 +213,7 @@ RC SqlEngine::select(int attr, const string& table, const vector<SelCond>& cond)
           break;
         }
         for(int i = 0; i < cond.size(); i++){
-          SelCond selCond = cond[i];
+          selCond = cond[i];
           if(selCond.comp == SelCond::EQ){
             if(key != atoi(selCond.value)){
               // breaks out of while loop since the conditionss are no longer true
