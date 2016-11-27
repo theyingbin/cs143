@@ -171,7 +171,7 @@ RC BTreeIndex::insertHelper(int key, const RecordId& rid, int height, PageId cur
         node.locateChildPtr(key, childPid);
 
         ret = insertHelper(key, rid, height+1, childPid, tempKey, tempPid);
-        if(tempKey != 0 && insertedPid != 0){
+        if(tempKey != 0 && tempPid != 0){
             // a split happened so we need to modify our current node
             ret = node.insert(tempKey, tempPid);
             if(ret == 0){
