@@ -12,6 +12,8 @@
 #include <cstdlib>
 #include <cstring>
 #include <climits>
+#include <fstream>
+
 
 using namespace std;
 
@@ -39,6 +41,11 @@ RC BTreeIndex::open(const string& indexname, char mode)
     if (errorCode)
         return errorCode;
 
+
+    if (pf.endPid() == 0) {
+        return pf.write(0, buffer);
+    }
+
     errorCode = pf.read(0, buffer);
 
     if (errorCode)
@@ -55,10 +62,9 @@ RC BTreeIndex::open(const string& indexname, char mode)
     if (tempRootPid > 0 && tempTreeHeight >= 0) {
         rootPid = tempRootPid;
         treeHeight = tempTreeHeight;
-        return 0;
     }
-    
-    return RC_FILE_OPEN_FAILED;
+
+    return 0;
 }
 
 /*
@@ -86,6 +92,7 @@ RC BTreeIndex::close()
  */
 RC BTreeIndex::insert(int key, const RecordId& rid)
 {
+    fprintf(stdout, "key = %d\n", key);
     RC error;
     if(key < 0)
             return RC_INVALID_ATTRIBUTE;
@@ -101,19 +108,20 @@ RC BTreeIndex::insert(int key, const RecordId& rid)
         return node.write(rootPid, pf);
     }
     else{
-        int insertedKey = INT_MAX;
-        PageId insertedPid = INT_MAX;
+        int insertedKey = -1;
+        PageId insertedPid = -1;
 
         return insertHelper(key, rid, 1, rootPid, insertedKey, insertedPid);
     }
 
 }
 
-RC BTreeIndex::insertHelper(int key, const RecordId& rid, int height, PageId curPid, int& tempKey, PageId& tempPid){
+RC BTreeIndex::insertHelper(int key, const RecordId& rid, int height, PageId curPid, int& insertedKey, PageId& insertedPid){
+    fprintf(stdout, "key = %d, height = %d, curPid = %d, insertedKey = %d, insertedPid = %d\n", key, height, curPid, insertedKey, insertedPid);
     RC ret;
 
-    tempKey = INT_MAX;
-    tempPid = INT_MAX;
+    insertedKey = -1;
+    insertedPid = -1;
 
     // We are at the leaf level
     if(height == treeHeight){
@@ -136,24 +144,24 @@ RC BTreeIndex::insertHelper(int key, const RecordId& rid, int height, PageId cur
             if(ret)
                 return ret;
 
-            tempPid = pf.endPid();
-            tempKey = siblingKey;
+            insertedPid = pf.endPid();
+            insertedKey = siblingKey;
 
             sibling.setNextNodePtr(curLeaf.getNextNodePtr());
-            curLeaf.setNextNodePtr(tempPid);
+            curLeaf.setNextNodePtr(insertedPid);
 
             // set changes
             ret = curLeaf.write(curPid, pf);
             if(ret)
                 return ret;        
-            ret = sibling.write(tempPid, pf);
+            ret = sibling.write(insertedPid, pf);
             if(ret)
                 return ret;
 
             // check for the case in which the insertion requires a new root
             if(treeHeight == 1){
                 BTNonLeafNode root;
-                root.initializeRoot(curPid, tempKey, tempPid);
+                root.initializeRoot(curPid, insertedKey, insertedPid);
                 treeHeight++;
 
                 rootPid = pf.endPid();
@@ -168,13 +176,13 @@ RC BTreeIndex::insertHelper(int key, const RecordId& rid, int height, PageId cur
         BTNonLeafNode node;
         node.read(curPid, pf);
 
-        PageId childPid;
+        PageId childPid = -1;
         node.locateChildPtr(key, childPid);
 
-        ret = insertHelper(key, rid, height+1, childPid, tempKey, tempPid);
-        if(tempKey != INT_MAX && tempPid != INT_MAX){
+        ret = insertHelper(key, rid, height+1, childPid, insertedKey, insertedPid);
+        if(insertedKey != -1 || insertedPid != -1){
             // a split happened so we need to modify our current node
-            ret = node.insert(tempKey, tempPid);
+            ret = node.insert(insertedKey, insertedPid);
             if(ret == 0){
                 node.write(curPid, pf);
                 return 0;
@@ -184,11 +192,11 @@ RC BTreeIndex::insertHelper(int key, const RecordId& rid, int height, PageId cur
             BTNonLeafNode sibling;
             int sibKey;
 
-            node.insertAndSplit(tempKey, tempPid, sibling, sibKey);
+            node.insertAndSplit(insertedKey, insertedPid, sibling, sibKey);
 
             PageId sibPid = pf.endPid();
-            tempPid = sibPid;
-            tempKey = sibKey;
+            insertedPid = sibPid;
+            insertedKey = sibKey;
 
             ret = node.write(curPid, pf);
             if(ret)
