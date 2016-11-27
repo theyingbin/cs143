@@ -140,8 +140,6 @@ RC BTLeafNode::insertAndSplit(int key, const RecordId& rid,
 
 	memcpy(&siblingKey, sibling.buffer + sizeof(RecordId), sizeof(int));
 
-	// Anything else to do here?
-
 	return 0; 
 }
 
@@ -277,8 +275,8 @@ RC BTNonLeafNode::insert(int key, PageId pid)
 		return RC_NODE_FULL;
 	}
 
-	// Offset first 8 bytes
-	int i = entrySize;
+	// Offset first pid
+	int i = sizeof(PageId);
 
 	// We know one more entry can fit so subtract entry size
 	// Go through until key is smaller than key in the buffer
@@ -339,11 +337,10 @@ RC BTNonLeafNode::insertAndSplit(int key, PageId pid, BTNonLeafNode& sibling, in
 	memset(sibling.buffer, 0, PageFile::PAGE_SIZE);
 
 	int halfKeys = (numKeys+1) / 2;
-	// Is this right?
 	int halfIndex = halfKeys * entrySize;
 
-	int lastFirstHalf = -1;
-	int firstSecondHalf = -1;
+	int lastFirstHalf;
+	int firstSecondHalf;
 
 	memcpy(&lastFirstHalf, buffer + halfIndex - sizeof(int), sizeof(int));
 	memcpy(&firstSecondHalf, buffer + halfIndex + sizeof(PageId), sizeof(int));
@@ -353,16 +350,12 @@ RC BTNonLeafNode::insertAndSplit(int key, PageId pid, BTNonLeafNode& sibling, in
 		
 		sibling.numKeys = numKeys - halfKeys;
 
-		memcpy(&midKey, buffer + halfIndex - sizeof(int), sizeof(int));
+		midKey = lastFirstHalf;
 
-		// Need to set sibling pid from buffer?
-
-		memset(buffer + halfIndex, 0, PageFile::PAGE_SIZE - halfIndex);
+		memset(buffer + halfIndex - entrySize, 0, PageFile::PAGE_SIZE - halfIndex + entrySize);
 		numKeys = halfKeys - 1;
 
 		insert(key, pid);
-
-		// Do we need to insert into parent too?
 
 	} else if (key > firstSecondHalf) {
 		// First pid, key pair is median
@@ -370,16 +363,12 @@ RC BTNonLeafNode::insertAndSplit(int key, PageId pid, BTNonLeafNode& sibling, in
 		
 		sibling.numKeys = numKeys - halfKeys - 1;
 
-		memcpy(&midKey, buffer + halfIndex + sizeof(PageId), sizeof(PageId));
-
-		// Need to set sibling pid from buffer?
+		midKey = firstSecondHalf;
 
 		memset(buffer + halfIndex, 0, PageFile::PAGE_SIZE - halfIndex);
 		numKeys = halfKeys;
 
 		sibling.insert(key, pid);
-
-		// Do we need to insert into parent too?
 
 	} else {
 		memcpy(sibling.buffer, buffer + halfIndex, PageFile::PAGE_SIZE - halfIndex);
@@ -388,12 +377,9 @@ RC BTNonLeafNode::insertAndSplit(int key, PageId pid, BTNonLeafNode& sibling, in
 
 		midKey = key;
 
-		// Need to set sibling pid from buffer?
-
 		memset(buffer + halfIndex, 0, PageFile::PAGE_SIZE - halfIndex);
 		numKeys = halfKeys;
 
-		// Do we need to insert into parent ?
 	}
 
 	return 0;

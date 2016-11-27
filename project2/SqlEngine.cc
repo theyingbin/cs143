@@ -67,10 +67,11 @@ RC SqlEngine::select(int attr, const string& table, const vector<SelCond>& cond)
   IndexCursor indexCursor;
   bool openedIndex = false;
   bool atLeastOneCondition = false;
+  SelCond selCond;
 
 
   for (int i = 0; i < cond.size(); i++) {
-    SelCond selCond = cond[i];
+    selCond = cond[i];
     condValue = atoi(selCond.value);
 
     if (selCond.attr == 1 && selCond.comp != SelCond::NE) {
@@ -78,8 +79,10 @@ RC SqlEngine::select(int attr, const string& table, const vector<SelCond>& cond)
       atLeastOneCondition = true;
       if (selCond.comp == SelCond::EQ) {
         keyToEqual = condValue;
-        maxKeyInRange = min(condValue, maxKeyInRange);
-        minKeyInRange = max(condValue, minKeyInRange);
+        if (maxKeyInRange == INT_MIN || condValue <= maxKeyInRange)
+          maxKeyInRange = condValue;
+        if (minKeyInRange == INT_MAX || condValue >= minKeyInRange)
+          minKeyInRange = condValue; 
 
       } else if (selCond.comp == SelCond::LT) {
         if (maxKeyInRange == INT_MIN || condValue <= maxKeyInRange)
@@ -112,6 +115,7 @@ RC SqlEngine::select(int attr, const string& table, const vector<SelCond>& cond)
     // add usesValue case here where we do a brute force search
     if (btIndex.open(table + ".idx", 'r') != 0 || (!atLeastOneCondition && attr != 4)) {
       // scan the table file from the beginning
+      fprintf(stdout, "LINEAR SCAN");
       rid.pid = rid.sid = 0;
       count = 0;
       while (rid < rf.endRid()) {
@@ -183,6 +187,7 @@ RC SqlEngine::select(int attr, const string& table, const vector<SelCond>& cond)
       // Use index case. This should never occur when have some equality statement on value. Only works for key
       openedIndex = true;
       count = 0;
+      fprintf(stdout, "IN INDEX");
 
       if (keyToEqual != INT_MAX)
         btIndex.locate(keyToEqual, indexCursor);
