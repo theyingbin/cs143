@@ -10,7 +10,8 @@
 #include "BTreeIndex.h"
 #include "BTreeNode.h"
 #include <cstdlib>
- #include <cstring>
+#include <cstring>
+#include <climits>
 
 using namespace std;
 
