@@ -114,7 +114,7 @@ RC SqlEngine::select(int attr, const string& table, const vector<SelCond>& cond)
 
     if (btIndex.open(table + ".idx", 'r') != 0 || !atLeastOneCondition || usesValue) {
       // scan the table file from the beginning
-      fprintf(stdout, "LINEAR SCAN\n");
+      //fprintf(stdout, "LINEAR SCAN\n");
       rid.pid = rid.sid = 0;
       count = 0;
       while (rid < rf.endRid()) {
@@ -186,7 +186,7 @@ RC SqlEngine::select(int attr, const string& table, const vector<SelCond>& cond)
       // Use index case. This should never occur when have some equality statement on value. Only works for key
       openedIndex = true;
       count = 0;
-      fprintf(stdout, "IN INDEX\n");
+      //fprintf(stdout, "IN INDEX\n");
 
       if (keyToEqual != INT_MAX)
         btIndex.locate(keyToEqual, indexCursor);
