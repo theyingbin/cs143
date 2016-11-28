@@ -114,7 +114,6 @@ class BTLeafNode {
     */
     char buffer[PageFile::PAGE_SIZE];
     
-    int numKeys; // number of keys in this node
 }; 
 
 
@@ -202,7 +201,6 @@ class BTNonLeafNode {
     */
     char buffer[PageFile::PAGE_SIZE];
 
-    int numKeys; // number of keys in this node
 }; 
 
 #endif /* BTREENODE_H */
