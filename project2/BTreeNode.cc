@@ -74,7 +74,7 @@ RC BTLeafNode::insert(int key, const RecordId& rid)
     for(int i = 0; i < getKeyCount(); i++){
         int checkKey;
         memcpy(&checkKey, buffer + offset + sizeof(RecordId), sizeof(int));
-        if(!checkKey || checkKey >= key)
+        if(checkKey >= key)
             break;
         offset += entrySize;
     }
