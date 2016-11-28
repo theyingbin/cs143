@@ -69,6 +69,7 @@ RC SqlEngine::select(int attr, const string& table, const vector<SelCond>& cond)
   bool atLeastOneCondition = false;
   SelCond selCond;
 
+  //cerr << "Cond size " << cond.size() << "\n";
 
   for (int i = 0; i < cond.size(); i++) {
     selCond = cond[i];
@@ -106,15 +107,16 @@ RC SqlEngine::select(int attr, const string& table, const vector<SelCond>& cond)
       // implement this part later
 
     }
+    //cerr << "maxKeyInRange " << maxKeyInRange << " minKeyInRange " << minKeyInRange << "\n";
   }
 
 
   // Valid range for keys does not exist, so don't even try
   if (!(maxKeyInRange != INT_MIN && minKeyInRange != INT_MAX && maxKeyInRange < minKeyInRange)) {
 
-    if (btIndex.open(table + ".idx", 'r') != 0 || !atLeastOneCondition || usesValue) {
+    if (btIndex.open(table + ".idx", 'r') != 0 || (!atLeastOneCondition && attr != 4)) {
       // scan the table file from the beginning
-      //fprintf(stdout, "LINEAR SCAN\n");
+      //cerr << "Linear Scan\n";
       rid.pid = rid.sid = 0;
       count = 0;
       while (rid < rf.endRid()) {
@@ -186,17 +188,17 @@ RC SqlEngine::select(int attr, const string& table, const vector<SelCond>& cond)
       // Use index case. This should never occur when have some equality statement on value. Only works for key
       openedIndex = true;
       count = 0;
-      //fprintf(stdout, "IN INDEX\n");
-
-      if (keyToEqual != INT_MAX)
+      //cerr << "Index - keyToEqual " << keyToEqual << " minKeyInRange " << minKeyInRange << " maxKeyInRange " << maxKeyInRange << "\n";
+      if (keyToEqual != INT_MAX) 
         btIndex.locate(keyToEqual, indexCursor);
       else if (minKeyInRange != INT_MAX)
         btIndex.locate(minKeyInRange, indexCursor);
       else
         btIndex.locate(0, indexCursor);
+        //cerr << "TEST1\n";
 
       while(btIndex.readForward(indexCursor, key, rid) == 0){
-        if(attr == 4){
+        if(attr == 4 && !usesValue){
           if(keyToEqual != INT_MAX && key != keyToEqual){
             // breaks out of while loop since the conditionss are no longer true
             break;
@@ -207,17 +209,21 @@ RC SqlEngine::select(int attr, const string& table, const vector<SelCond>& cond)
           if(minKeyInRange != INT_MAX && key < minKeyInRange){
             break;
           }
+          count++;
+          continue;
         }
+        //cerr << "TEST\n";
         if((rc = rf.read(rid, key, value)) < 0){
-          cout << "Error occured when reading a tuple in table " << table << endl;
+          //cerr << "Error occured when reading a tuple in table " << table << endl;
           break;
         }
+        //cerr << "Key " << key << " value " << value << "\n";
         for(int i = 0; i < cond.size(); i++){
           selCond = cond[i];
           if(selCond.comp == SelCond::EQ){
             if(key != atoi(selCond.value)){
               // breaks out of while loop since the conditionss are no longer true
-              break;
+              goto end_early;
             }
           }
           if(selCond.comp == SelCond::NE){
@@ -240,13 +246,14 @@ RC SqlEngine::select(int attr, const string& table, const vector<SelCond>& cond)
           if(selCond.comp == SelCond::LE){
             if(key > atoi(selCond.value)){
               // no point in searching the other tuples since the next ones will only be larger
-              break;
+              goto end_early;
             }
           }
           if(selCond.comp == SelCond::LT){
+            //cerr << "key " << key << " cond " << selCond.value << "\n";
             if(key >= atoi(selCond.value)){
               // no point in searching the other tuples since the next ones will only be larger
-              break;
+              goto end_early;
             }
           }
         }
@@ -270,7 +277,7 @@ RC SqlEngine::select(int attr, const string& table, const vector<SelCond>& cond)
     }
   }
 
-
+  end_early:
 
   // This stuff should happen no matter what
   // break statement will land you here
