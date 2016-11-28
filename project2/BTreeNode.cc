@@ -281,6 +281,7 @@ int BTNonLeafNode::getKeyCount()
 }
 
 void BTNonLeafNode::setKeyCount(int keys){
+	cerr << "Setting numkeys to " << keys << "\n";
     int* numKeys = (int*)(buffer + PageFile::PAGE_SIZE - sizeof(int));
     *numKeys = keys;
 }
@@ -328,15 +329,20 @@ RC BTNonLeafNode::insert(int key, PageId pid)
     memcpy(nextBuffer + i, &key, sizeof(int));
     memcpy(nextBuffer + i + sizeof(int), &pid, sizeof(PageId));
 
+    cerr << "Keycount before increase " << getKeyCount() << "\n";
+    setKeyCount(getKeyCount() + 1);
+    cerr << "Keycount increased to " << getKeyCount() << "\n";
+
+    int keyCount = getKeyCount();
+    memcpy(nextBuffer + PageFile::PAGE_SIZE - sizeof(int), &keyCount, sizeof(int));
+
     // After we insert our entry, copy the rest in
     // sizeof(PageId) + numKeys * entrySize - i gives entries after insert (ignore initial entry)
     memcpy(nextBuffer + i + entrySize, buffer + i, sizeof(PageId) + getKeyCount() * entrySize - i);
 
+
     memcpy(buffer, nextBuffer, PageFile::PAGE_SIZE);
     free(nextBuffer);
-
-    setKeyCount(getKeyCount() + 1);
-    cerr << "Keycount increased to " << getKeyCount() << "\n";
 
     return 0; 
 }

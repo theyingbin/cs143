@@ -174,6 +174,7 @@ RC BTreeIndex::insertHelper(int key, const RecordId& rid, int height, PageId cur
                 treeHeight++;
 
                 rootPid = pf.endPid();
+                cerr << "Rootpid is " << rootPid << "\n";
                 root.write(rootPid, pf);
             }
 
