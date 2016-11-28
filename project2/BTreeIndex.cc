@@ -92,10 +92,7 @@ RC BTreeIndex::close()
  */
 RC BTreeIndex::insert(int key, const RecordId& rid)
 {
-    //fprintf(stdout, "key = %d\n", key);
     RC error;
-    if(key < 0)
-            return RC_INVALID_ATTRIBUTE;
 
     // Check if we need to create a new tree
     if(treeHeight == 0){
@@ -117,7 +114,6 @@ RC BTreeIndex::insert(int key, const RecordId& rid)
 }
 
 RC BTreeIndex::insertHelper(int key, const RecordId& rid, int height, PageId curPid, int& insertedKey, PageId& insertedPid){
-    //fprintf(stdout, "key = %d, height = %d, curPid = %d, insertedKey = %d, insertedPid = %d\n", key, height, curPid, insertedKey, insertedPid);
     RC ret;
 
     insertedKey = -1;
@@ -132,7 +128,9 @@ RC BTreeIndex::insertHelper(int key, const RecordId& rid, int height, PageId cur
 
         // attempt to insert
         ret = curLeaf.insert(key, rid);
+                    fprintf(stderr, "cur next-%d key-%d (outside)\n", curLeaf.getNextNodePtr(), key);
         if(!ret){
+            fprintf(stderr, "%s - %d\n", "Success for insert", key);
             curLeaf.write(curPid, pf);
             return 0;
         }
@@ -149,6 +147,8 @@ RC BTreeIndex::insertHelper(int key, const RecordId& rid, int height, PageId cur
 
             sibling.setNextNodePtr(curLeaf.getNextNodePtr());
             curLeaf.setNextNodePtr(insertedPid);
+
+                    fprintf(stderr, "sibling next-%d key-%d (inside)\n", sibling.getNextNodePtr(), siblingKey);
 
             // set changes
             ret = curLeaf.write(curPid, pf);
@@ -178,8 +178,10 @@ RC BTreeIndex::insertHelper(int key, const RecordId& rid, int height, PageId cur
 
         PageId childPid = -1;
         node.locateChildPtr(key, childPid);
+        fprintf(stderr, "childPid - %d\n", childPid);
 
         ret = insertHelper(key, rid, height+1, childPid, insertedKey, insertedPid);
+        fprintf(stderr, "insert helper for key: %d gave insertedKey: %d insertedPid: %d \n", key, insertedKey, insertedPid);
         if(insertedKey != -1 || insertedPid != -1){
             // a split happened so we need to modify our current node
             ret = node.insert(insertedKey, insertedPid);
@@ -271,14 +273,10 @@ RC BTreeIndex::locate(int searchKey, IndexCursor& cursor)
     // And eid is set correctly to just after largest element that is smaller (aka right place)
     // so just assign and return either way
     errorCode = leafNode.locate(searchKey, eid);
-    if (errorCode && eid == leafNode.getKeyCount())
-        cursor.pid = leafNode.getNextNodePtr();
-    else {
-        cursor.pid = pid;
-        cursor.eid = eid;
-    }
+    cursor.pid = pid;
+    cursor.eid = eid;
 
-    return 0;
+    return errorCode;
 }
 
 /*
