@@ -148,6 +148,7 @@ RC BTreeIndex::insertHelper(int key, const RecordId& rid, int height, PageId cur
             insertedPid = pf.endPid();
             insertedKey = siblingKey;
 
+            sibling.setNextNodePtr(curLeaf.getNextNodePtr());
             curLeaf.setNextNodePtr(insertedPid);
 
                     // fprintf(stderr, "sibling next-%d key-%d (inside)\n", sibling.getNextNodePtr(), siblingKey);
