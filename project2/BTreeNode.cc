@@ -388,7 +388,7 @@ RC BTNonLeafNode::insertAndSplit(int key, PageId pid, BTNonLeafNode& sibling, in
 
         midKey = lastFirstHalf;
 
-        memset(buffer + halfIndex - entrySize, 0, PageFile::PAGE_SIZE - halfIndex + entrySize);
+        memset(buffer + halfIndex - entrySize, 0, PageFile::PAGE_SIZE - halfIndex + entrySize - sizeof(int));
         setKeyCount(halfKeys - 1);
 
         insert(key, pid);
@@ -401,7 +401,7 @@ RC BTNonLeafNode::insertAndSplit(int key, PageId pid, BTNonLeafNode& sibling, in
 
         midKey = firstSecondHalf;
 
-        memset(buffer + halfIndex, 0, PageFile::PAGE_SIZE - halfIndex);
+        memset(buffer + halfIndex, 0, PageFile::PAGE_SIZE - halfIndex - sizeof(int));
         setKeyCount(halfKeys);
 
         sibling.insert(key, pid);
@@ -413,7 +413,7 @@ RC BTNonLeafNode::insertAndSplit(int key, PageId pid, BTNonLeafNode& sibling, in
 
         midKey = key;
 
-        memset(buffer + halfIndex, 0, PageFile::PAGE_SIZE - halfIndex);
+        memset(buffer + halfIndex, 0, PageFile::PAGE_SIZE - halfIndex - sizeof(int));
         setKeyCount(halfKeys);
 
     }

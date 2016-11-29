@@ -188,7 +188,7 @@ RC SqlEngine::select(int attr, const string& table, const vector<SelCond>& cond)
       // Use index case. This should never occur when have some equality statement on value. Only works for key
       openedIndex = true;
       count = 0;
-      //cerr << "Index - keyToEqual " << keyToEqual << " minKeyInRange " << minKeyInRange << " maxKeyInRange " << maxKeyInRange << "\n";
+      // cerr << "Index - keyToEqual " << keyToEqual << " minKeyInRange " << minKeyInRange << " maxKeyInRange " << maxKeyInRange << "\n";
       if (keyToEqual != INT_MAX) 
         btIndex.locate(keyToEqual, indexCursor);
       else if (minKeyInRange != INT_MAX)
