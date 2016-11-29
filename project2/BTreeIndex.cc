@@ -311,6 +311,7 @@ RC BTreeIndex::locate(int searchKey, IndexCursor& cursor)
  */
 RC BTreeIndex::readForward(IndexCursor& cursor, int& key, RecordId& rid)
 {
+    //cerr << "Read forward start: cursor pid " << cursor.pid << " eid " << cursor.eid << "\n";
     RC errorCode;
 
     // 0 not allowed bc store rootPid and treeHeight there
@@ -335,6 +336,7 @@ RC BTreeIndex::readForward(IndexCursor& cursor, int& key, RecordId& rid)
     } else {
         cursor.eid++;
     }
+    //cerr << "Read forward end: cursor pid " << cursor.pid << " eid " << cursor.eid << "\n";
 
     return 0;
 }
