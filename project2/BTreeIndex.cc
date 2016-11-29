@@ -148,7 +148,6 @@ RC BTreeIndex::insertHelper(int key, const RecordId& rid, int height, PageId cur
             insertedPid = pf.endPid();
             insertedKey = siblingKey;
 
-            sibling.setNextNodePtr(curLeaf.getNextNodePtr());
             curLeaf.setNextNodePtr(insertedPid);
 
                     // fprintf(stderr, "sibling next-%d key-%d (inside)\n", sibling.getNextNodePtr(), siblingKey);
@@ -161,7 +160,7 @@ RC BTreeIndex::insertHelper(int key, const RecordId& rid, int height, PageId cur
             if(ret)
                 return ret;
 
-            //cerr << "Inside Helper, split required, success --> Key " << key << " inserted\n";
+            //cerr << "Inside Helper, split required, success --> Key " << key << " adjusted at pid " << curPid << "\n";
             //cerr << "Sibling to above --> Key " << siblingKey << " inserted at pid " << insertedPid << "\n";
 
 
@@ -189,46 +188,50 @@ RC BTreeIndex::insertHelper(int key, const RecordId& rid, int height, PageId cur
 
         PageId childPid = -1;
         node.locateChildPtr(key, childPid);
-        // fprintf(stderr, "childPid - %d\n", childPid);
+        //fprintf(stderr, "childPid - %d\n", childPid);
 
         //cerr << "Inside Helper, calling helper again --> Key " << key << " pid to look into " << childPid << "\n";
-        ret = insertHelper(key, rid, height+1, childPid, insertedKey, insertedPid);
+        int iKey = - 1;
+        PageId iPid = -1;
+        ret = insertHelper(key, rid, height+1, childPid, iKey, iPid);
+        if (ret)
+            return ret;
         // fprintf(stderr, "insert helper for key: %d gave insertedKey: %d insertedPid: %d \n", key, insertedKey, insertedPid);
 
-        if(insertedKey != -1 || insertedPid != -1){
+        if(!(iKey == -1 && iPid == -1)){
             // a split happened so we need to modify our current node
-            ret = node.insert(insertedKey, insertedPid);
+            ret = node.insert(iKey, iPid);
             if(ret == 0){
-                //cerr << "Inside Helper, split occurred, modify current node --> Key " << insertedKey << " inserted at pid " << insertedPid << "\n";
+                //cerr << "Inside Helper, split occurred, modify current node --> Key " << iKey << " inserted at pid " << iPid << "\n";
                 node.write(curPid, pf);
                 return 0;
             }
 
+            //cerr << "Need another split at this level\n";
+
             // we must also do a split at this level since node is full
             BTNonLeafNode sibling;
-            int sibKey;
 
-            node.insertAndSplit(insertedKey, insertedPid, sibling, sibKey);
+            node.insertAndSplit(iKey, iPid, sibling, iKey);
 
-            PageId sibPid = pf.endPid();
-            insertedPid = sibPid;
-            insertedKey = sibKey;
+            iPid = pf.endPid();
 
             ret = node.write(curPid, pf);
             if(ret)
                 return ret;
-            ret = sibling.write(sibPid, pf);
+            ret = sibling.write(iPid, pf);
             if(ret)
                 return ret;
 
-            //cerr << "Inside Helper, split occurred, modify current node, needed another split -->" << 
-                //"current pid " << curPid << " sibling pid " << sibPid << "\n";
+            // cerr << "Inside Helper, split occurred on nonleaf needed another split -->" << 
+            //     "current pid " << curPid << " sibling pid " << sibPid << "\n";
 
 
             // check for the case in which we need a new root
             if(treeHeight == 1){
+                //cerr << "Inside Helper, split required on nonleaf, new root required, root has --> pid1 " << curPid << " key " << iKey << " pid2 " << iPid << "\n";
                 BTNonLeafNode root;
-                root.initializeRoot(curPid, sibKey, sibPid);
+                root.initializeRoot(curPid, iKey, iPid);
                 treeHeight++;
 
                 rootPid = pf.endPid();
