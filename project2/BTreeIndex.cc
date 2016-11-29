@@ -213,14 +213,14 @@ RC BTreeIndex::insertHelper(int key, const RecordId& rid, int height, PageId cur
             // we must also do a split at this level since node is full
             BTNonLeafNode sibling;
 
-            node.insertAndSplit(iKey, iPid, sibling, iKey);
+            node.insertAndSplit(iKey, iPid, sibling, insertedKey);
 
-            iPid = pf.endPid();
+            insertedPid = pf.endPid();
 
             ret = node.write(curPid, pf);
             if(ret)
                 return ret;
-            ret = sibling.write(iPid, pf);
+            ret = sibling.write(insertedPid, pf);
             if(ret)
                 return ret;
 
@@ -232,7 +232,7 @@ RC BTreeIndex::insertHelper(int key, const RecordId& rid, int height, PageId cur
             if(height == 1){
                 //cerr << "Inside Helper, split required on nonleaf, new root required, root has --> pid1 " << curPid << " key " << iKey << " pid2 " << iPid << "\n";
                 BTNonLeafNode root;
-                root.initializeRoot(curPid, iKey, iPid);
+                root.initializeRoot(curPid, insertedKey, insertedPid);
                 treeHeight++;
 
                 rootPid = pf.endPid();

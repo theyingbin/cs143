@@ -7,7 +7,7 @@ int main() {
     int rc;
     BTreeIndex tree;
     rc = tree.open("test.txt", 'w');
-    for(int i = 0; i < 13000; i++) {
+    for(int i = 0; i < 20000; i++) {
     	int key = i;
     	RecordId rid;
     	rid.pid = i + 1;
@@ -19,7 +19,7 @@ int main() {
     rc = tree.locate(0, cursor);
     int key;
     RecordId rid;
-    for(int i = 0; i < 13000; i++) {
+    for(int i = 0; i < 20000; i++) {
     	rc = tree.readForward(cursor, key, rid);
     	cout << "key: " << key << "; pid: " << rid.pid << ", sid: " << rid.sid << endl;
     }
@@ -28,7 +28,7 @@ int main() {
     BTreeIndex new_tree;
     rc = new_tree.open("test.txt", 'w');
     rc = new_tree.locate(0, cursor);
-    for(int i = 0; i < 13000; i++) {
+    for(int i = 0; i < 20000; i++) {
     	rc = new_tree.readForward(cursor, key, rid);
     	cout << "key: " << key << "; pid: " << rid.pid << ", sid: " << rid.sid << endl;
     }
