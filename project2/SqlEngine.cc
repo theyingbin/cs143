@@ -195,6 +195,16 @@ RC SqlEngine::select(int attr, const string& table, const vector<SelCond>& cond)
         if((rc = rf.read(rid, key, value)) < 0){
           break;
         }
+        if(keyToEqual != INT_MAX && key != keyToEqual){
+          // breaks out of while loop since the conditionss are no longer true
+          break;
+        }
+        if(maxKeyInRange != INT_MIN && key > maxKeyInRange){
+          break;
+        }
+        if(minKeyInRange != INT_MAX && key < minKeyInRange){
+          break;
+        }
         // check the conditions on the tuple
         for (unsigned i = 0; i < cond.size(); i++) {
           // compute the difference between the tuple value and the condition value
