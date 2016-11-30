@@ -175,7 +175,7 @@ RC SqlEngine::select(int attr, const string& table, const vector<SelCond>& cond)
       else if (minKeyInRange != INT_MAX)
         btIndex.locate(minKeyInRange, indexCursor);
       else
-        btIndex.locate(0, indexCursor);
+        btIndex.locate(INT_MIN, indexCursor);
 
       while(btIndex.readForward(indexCursor, key, rid) == 0){
         if(attr == 4 && !usesValue){
