@@ -64,7 +64,6 @@ RC SqlEngine::select(int attr, const string& table, const vector<SelCond>& cond)
   bool atLeastOneCondition = false;
   SelCond selCond;
 
-  //cerr << "Cond size " << cond.size() << "\n";
 
   for (int i = 0; i < cond.size(); i++) {
     selCond = cond[i];
@@ -99,10 +98,7 @@ RC SqlEngine::select(int attr, const string& table, const vector<SelCond>& cond)
     }
     else if(selCond.attr == 2){
       usesValue = true;
-      // implement this part later
-
     }
-    //cerr << "maxKeyInRange " << maxKeyInRange << " minKeyInRange " << minKeyInRange << "\n";
   }
 
 
@@ -110,20 +106,15 @@ RC SqlEngine::select(int attr, const string& table, const vector<SelCond>& cond)
   if (!(maxKeyInRange != INT_MIN && minKeyInRange != INT_MAX && maxKeyInRange < minKeyInRange)) {
 
     if (btIndex.open(table + ".idx", 'r') != 0 || (!atLeastOneCondition && attr != 4)) {
-      // scan the table file from the beginning
-      //cerr << "Linear Scan\n";
       rid.pid = rid.sid = 0;
       count = 0;
       while (rid < rf.endRid()) {
-        // read the tuple
         if ((rc = rf.read(rid, key, value)) < 0) {
           fprintf(stderr, "Error: while reading a tuple from table %s\n", table.c_str());
           goto exit_select;
         }
 
-        // check the conditions on the tuple
         for (unsigned i = 0; i < cond.size(); i++) {
-          // compute the difference between the tuple value and the condition value
           switch (cond[i].attr) {
             case 1:
               diff = key - atoi(cond[i].value);
@@ -133,7 +124,6 @@ RC SqlEngine::select(int attr, const string& table, const vector<SelCond>& cond)
               break;
           }
 
-          // skip the tuple if any condition is not met
           switch (cond[i].comp) {
             case SelCond::EQ:
               if (diff != 0) goto next;
@@ -157,11 +147,8 @@ RC SqlEngine::select(int attr, const string& table, const vector<SelCond>& cond)
 
         }
 
-        // the condition is met for the tuple. 
-        // increase matching tuple counter
         count++;
 
-        // print the tuple 
         switch (attr) {
         case 1:  // SELECT key
           fprintf(stdout, "%d\n", key);
@@ -183,14 +170,12 @@ RC SqlEngine::select(int attr, const string& table, const vector<SelCond>& cond)
       // Use index case. This should never occur when have some equality statement on value. Only works for key
       openedIndex = true;
       count = 0;
-      // cerr << "Index - keyToEqual " << keyToEqual << " minKeyInRange " << minKeyInRange << " maxKeyInRange " << maxKeyInRange << "\n";
       if (keyToEqual != INT_MAX) 
         btIndex.locate(keyToEqual, indexCursor);
       else if (minKeyInRange != INT_MAX)
         btIndex.locate(minKeyInRange, indexCursor);
       else
         btIndex.locate(0, indexCursor);
-        //cerr << "TEST1\n";
 
       while(btIndex.readForward(indexCursor, key, rid) == 0){
         if(attr == 4 && !usesValue){
@@ -207,9 +192,7 @@ RC SqlEngine::select(int attr, const string& table, const vector<SelCond>& cond)
           count++;
           continue;
         }
-        //cerr << "TEST\n";
         if((rc = rf.read(rid, key, value)) < 0){
-          //cerr << "Error occured when reading a tuple in table " << table << endl;
           break;
         }
         // check the conditions on the tuple
@@ -281,15 +264,11 @@ RC SqlEngine::select(int attr, const string& table, const vector<SelCond>& cond)
   }
   end_early:
 
-  // This stuff should happen no matter what
-  // break statement will land you here
-  // print matching tuple count if "select count(*)"
   if (attr == 4) {
     cout << count << endl;
   }
   rc = 0;
 
-  // close the table file and return
   exit_select:
   if (openedIndex) btIndex.close();
   rf.close();

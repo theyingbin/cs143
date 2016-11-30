@@ -103,7 +103,6 @@ RC BTreeIndex::insert(int key, const RecordId& rid)
         // if endPid == 0, set to rootPid to 1, else set to endPid
         rootPid = pf.endPid() == 0 ? 1 : pf.endPid();
         treeHeight++;
-        //cerr << "(Top level insert - tree height = 0 --> Key " << key << " inserted at pid " << rootPid << "\n";
         return node.write(rootPid, pf);
     }
     else{
@@ -130,10 +129,7 @@ RC BTreeIndex::insertHelper(int key, const RecordId& rid, int height, PageId cur
 
         // attempt to insert
         ret = curLeaf.insert(key, rid);
-                    // fprintf(stderr, "cur next-%d key-%d (outside)\n", curLeaf.getNextNodePtr(), key);
         if(!ret){
-            // fprintf(stderr, "%s - %d\n", "Success for insert", key);
-            //cerr << "Inside Helper, insert into leaf success, no split --> Key " << key << " inserted at pid " << curPid << "\n";
             curLeaf.write(curPid, pf);
             return 0;
         }
@@ -151,8 +147,6 @@ RC BTreeIndex::insertHelper(int key, const RecordId& rid, int height, PageId cur
             sibling.setNextNodePtr(curLeaf.getNextNodePtr());
             curLeaf.setNextNodePtr(insertedPid);
 
-                    // fprintf(stderr, "sibling next-%d key-%d (inside)\n", sibling.getNextNodePtr(), siblingKey);
-
             // set changes
             ret = curLeaf.write(curPid, pf);
             if(ret)
@@ -161,20 +155,13 @@ RC BTreeIndex::insertHelper(int key, const RecordId& rid, int height, PageId cur
             if(ret)
                 return ret;
 
-            //cerr << "Inside Helper, split required, success --> Key " << key << " adjusted at pid " << curPid << "\n";
-            //cerr << "Sibling to above --> Key " << siblingKey << " inserted at pid " << insertedPid << "\n";
-
-
-
             // check for the case in which the insertion requires a new root
             if(treeHeight == 1){
-                //cerr << "Inside Helper, split required, new root required, root has --> pid1 " << curPid << " key " << insertedKey << " pid2 " << insertedPid << "\n";
                 BTNonLeafNode root;
                 root.initializeRoot(curPid, insertedKey, insertedPid);
                 treeHeight++;
 
                 rootPid = pf.endPid();
-                //cerr << "Rootpid is " << rootPid << "\n";
                 root.write(rootPid, pf);
             }
 
@@ -183,32 +170,25 @@ RC BTreeIndex::insertHelper(int key, const RecordId& rid, int height, PageId cur
     }
     else{
         // We are not in the leaf level anymore
-        //cerr << "Inside Helper, nonleafnode level, success --> Key " << key << " inserted at pid " << curPid << "\n";
         BTNonLeafNode node;
         node.read(curPid, pf);
 
         PageId childPid = -1;
         node.locateChildPtr(key, childPid);
-        //fprintf(stderr, "childPid - %d\n", childPid);
 
-        //cerr << "Inside Helper, calling helper again --> Key " << key << " pid to look into " << childPid << "\n";
         int iKey = - 1;
         PageId iPid = -1;
         ret = insertHelper(key, rid, height+1, childPid, iKey, iPid);
         if (ret)
             return ret;
-        // fprintf(stderr, "insert helper for key: %d gave insertedKey: %d insertedPid: %d \n", key, insertedKey, insertedPid);
 
         if(!(iKey == -1 && iPid == -1)){
             // a split happened so we need to modify our current node
             ret = node.insert(iKey, iPid);
             if(ret == 0){
-                //cerr << "Inside Helper, split occurred, modify current node --> Key " << iKey << " inserted at pid " << iPid << "\n";
                 node.write(curPid, pf);
                 return 0;
             }
-
-            //cerr << "Need another split at this level\n";
 
             // we must also do a split at this level since node is full
             BTNonLeafNode sibling;
@@ -224,13 +204,10 @@ RC BTreeIndex::insertHelper(int key, const RecordId& rid, int height, PageId cur
             if(ret)
                 return ret;
 
-            // cerr << "Inside Helper, split occurred on nonleaf needed another split -->" << 
-            //     "current pid " << curPid << " sibling pid " << sibPid << "\n";
 
 
             // check for the case in which we need a new root
             if(height == 1){
-                //cerr << "Inside Helper, split required on nonleaf, new root required, root has --> pid1 " << curPid << " key " << iKey << " pid2 " << iPid << "\n";
                 BTNonLeafNode root;
                 root.initializeRoot(curPid, insertedKey, insertedPid);
                 treeHeight++;
@@ -311,7 +288,6 @@ RC BTreeIndex::locate(int searchKey, IndexCursor& cursor)
  */
 RC BTreeIndex::readForward(IndexCursor& cursor, int& key, RecordId& rid)
 {
-    //cerr << "Read forward start: cursor pid " << cursor.pid << " eid " << cursor.eid << "\n";
     RC errorCode;
 
     // 0 not allowed bc store rootPid and treeHeight there
@@ -336,7 +312,6 @@ RC BTreeIndex::readForward(IndexCursor& cursor, int& key, RecordId& rid)
     } else {
         cursor.eid++;
     }
-    //cerr << "Read forward end: cursor pid " << cursor.pid << " eid " << cursor.eid << "\n";
 
     return 0;
 }
