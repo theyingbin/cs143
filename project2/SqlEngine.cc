@@ -38,25 +38,20 @@ RC SqlEngine::run(FILE* commandline)
 
 RC SqlEngine::select(int attr, const string& table, const vector<SelCond>& cond)
 {
-  RecordFile rf;   // RecordFile containing the table
-  RecordId   rid;  // record cursor for table scanning
-
+  RecordFile rf;
+  RecordId   rid;  
   RC     rc;
+
+  if ((rc = rf.open(table + ".tbl", 'r')) < 0) {
+    fprintf(stderr, "Error: table %s does not exist\n", table.c_str());
+    return rc;
+  }
+
   int    key;     
   string value;
   int    count;
   int    diff;
-
-  // open the table file
-  if ((rc = rf.open(table + ".tbl", 'r')) < 0) {
-    fprintf(stderr, "Error - Table %s doesn't exist\n", table.c_str());
-    return rc;
-  }
-
-  string valueMin = "";
-  string valueMax = "";
   bool usesValue = false;
-  string valToEqual;
 
   int condValue;
   int keyToEqual = INT_MAX;
@@ -217,48 +212,55 @@ RC SqlEngine::select(int attr, const string& table, const vector<SelCond>& cond)
           //cerr << "Error occured when reading a tuple in table " << table << endl;
           break;
         }
-        //cerr << "Key " << key << " value " << value << "\n";
-        for(int i = 0; i < cond.size(); i++){
-          selCond = cond[i];
-          if(selCond.comp == SelCond::EQ){
-            if(key != atoi(selCond.value)){
-              // breaks out of while loop since the conditionss are no longer true
-              goto end_early;
-            }
+        // check the conditions on the tuple
+        for (unsigned i = 0; i < cond.size(); i++) {
+          // compute the difference between the tuple value and the condition value
+          switch (cond[i].attr) {
+            case 1:
+              diff = key - atoi(cond[i].value);
+              break;
+            case 2:
+              diff = strcmp(value.c_str(), cond[i].value);
+              break;
           }
-          if(selCond.comp == SelCond::NE){
-            // is this case right? I don't think it is
-            if(key == atoi(selCond.value)){
-              // move on to the next thing the cursor points to
-              continue;
-            }
-          }
-          if(selCond.comp == SelCond::GE){
-            if(key < atoi(selCond.value)){
-              continue;
-            }
-          }
-          if(selCond.comp == SelCond::GT){
-            if(key <= atoi(selCond.value)){
-              continue;
-            }
-          }
-          if(selCond.comp == SelCond::LE){
-            if(key > atoi(selCond.value)){
-              // no point in searching the other tuples since the next ones will only be larger
-              goto end_early;
-            }
-          }
-          if(selCond.comp == SelCond::LT){
-            //cerr << "key " << key << " cond " << selCond.value << "\n";
-            if(key >= atoi(selCond.value)){
-              // no point in searching the other tuples since the next ones will only be larger
-              goto end_early;
-            }
+
+          // skip the tuple if any condition is not met
+          switch (cond[i].comp) {
+            case SelCond::EQ:
+              if (diff != 0) {
+                if (cond[i].attr == 1)
+                  goto end_early;
+                else
+                  goto keep_going;
+              }              
+              break;
+            case SelCond::NE:
+              if (diff == 0) goto keep_going;
+              break;
+            case SelCond::GT:
+              if (diff <= 0) goto keep_going;
+              break;
+            case SelCond::LT:
+              if (diff >= 0) {
+                if (cond[i].attr == 1)
+                  goto end_early;
+                else
+                  goto keep_going;
+              }
+              break;
+            case SelCond::GE:
+              if (diff < 0) goto keep_going;
+              break;
+            case SelCond::LE:
+              if (diff > 0) {
+                if (cond[i].attr == 1)
+                  goto end_early;
+                else
+                  goto keep_going;
+              }
+              break;
           }
         }
-        // the condition is met for the tuple. 
-        // increase matching tuple counter
         count++;
    
         // print the tuple 
@@ -273,10 +275,10 @@ RC SqlEngine::select(int attr, const string& table, const vector<SelCond>& cond)
           cout << key << " '" << value << "'" << endl;
           break;
         }
+        keep_going: ;
       }
     }
   }
-
   end_early:
 
   // This stuff should happen no matter what
@@ -293,6 +295,8 @@ RC SqlEngine::select(int attr, const string& table, const vector<SelCond>& cond)
   rf.close();
   return rc;
 }
+
+  
 
 RC SqlEngine::load(const string& table, const string& loadfile, bool index)
 {
